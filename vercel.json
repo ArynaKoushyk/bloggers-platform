@@ -1,0 +1,9 @@
+{
+  "version": 2,
+
+  "name": "bloggers-platform",
+
+  "builds": [{ "src": "src/index.ts", "use": "@vercel/node" }],
+
+  "routes": [{ "src": "/(.*)", "dest": "scr/index.ts" }]
+}
