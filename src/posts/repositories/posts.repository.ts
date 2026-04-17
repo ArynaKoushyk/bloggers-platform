@@ -1,29 +1,21 @@
 import { db } from "../../db/in-memory.db";
-import { Post } from "../types/post.type";
+import { DbPost, Post } from "../types/post.type";
 import { PostInputDto } from "../dto/post-input.dto";
 
 export const postsRepository = {
-  findAll(): Post[] {
+  findAll(): DbPost[] {
     return db.posts;
   },
 
-  findById(id: string): Post | null {
+  findById(id: string): DbPost | null {
     return (
       db.posts.find((posts) => {
         return posts.id === id;
       }) ?? null
     );
   },
-  //!!как получить blogName
-  createPost(dto: PostInputDto): Post {
-    const newPost = {
-      id: Date.now().toString(),
-      title: dto.title,
-      shortDescription: dto.shortDescription,
-      content: dto.content,
-      blogId: dto.blogId,
-      blogName: "name",
-    };
+
+  createPost(newPost: DbPost): DbPost {
     db.posts.push(newPost);
     return newPost;
   },

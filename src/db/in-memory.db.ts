@@ -1,5 +1,5 @@
 import { Blog } from "../blogs/types/blogs.type";
-import { Post } from "../posts/types/post.type";
+import { DbPost, Post } from "../posts/types/post.type";
 
 export const db = {
   blogs: <Blog[]>[
@@ -25,5 +25,5 @@ export const db = {
       websiteUrl: "https://wanderlust.example.com",
     },
   ],
-  posts: <Post[]>[],
+  posts: <DbPost[]>[],
 };

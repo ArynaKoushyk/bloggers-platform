@@ -5,5 +5,5 @@
 
   "builds": [{ "src": "src/index.ts", "use": "@vercel/node" }],
 
-  "routes": [{ "src": "/(.*)", "dest": "scr/index.ts" }]
+  "routes": [{ "src": "/(.*)", "dest": "src/index.ts" }]
 }

@@ -17,12 +17,14 @@ export function createPostHandler(
       .send(createErrorMessages([{ field: "id", message: "Blog not found" }]));
     return;
   }
-  const newPost = {
+  const postDto = {
+    id: Date.now().toString(),
     title: req.body.title,
     shortDescription: req.body.shortDescription,
     content: req.body.content,
     blogId: blogId,
   };
-  postsRepository.createPost(newPost);
+  postsRepository.createPost(postDto);
+  const newPost = {...postDto, blogName: blog.name}
   res.status(HttpStatus.Created).send(newPost);
 }
