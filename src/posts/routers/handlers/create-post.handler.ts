@@ -25,6 +25,6 @@ export function createPostHandler(
     blogId: blogId,
   };
   postsRepository.createPost(postDto);
-  const newPost = {...postDto, blogName: blog.name}
-  res.status(HttpStatus.Created).send(newPost);
+  const newPost = { ...postDto, blogName: blog.name };
+  return res.status(HttpStatus.Created).send(newPost);
 }

@@ -11,10 +11,10 @@ export function updatePostHandler(
   const id = req.params.id;
   const post = postsRepository.findById(id);
   if (!post) {
-    res
+    return res
       .status(HttpStatus.NotFound)
       .send(createErrorMessages([{ field: "id", message: "Post not found" }]));
   }
   postsRepository.updatePost(id, req.body);
-  res.sendStatus(HttpStatus.NoContent);
+  return res.sendStatus(HttpStatus.NoContent);
 }

@@ -17,5 +17,5 @@ export function getPostHandler(req: Request<{ id: string }>, res: Response) {
     );
     return;
   }
-  res.send(HttpStatus.Ok).send(post);
+ return  res.send(HttpStatus.Ok).send(post);
 }

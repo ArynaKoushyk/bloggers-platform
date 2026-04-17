@@ -13,5 +13,5 @@ export function deletePostHandler(req: Request<{ id: string }>, res: Response) {
       return
   }
   postsRepository.deletePost(id);
-  res.sendStatus(HttpStatus.NoContent);
+ return res.sendStatus(HttpStatus.NoContent);
 }
