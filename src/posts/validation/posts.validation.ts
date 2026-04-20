@@ -26,7 +26,7 @@ export const shortDescriptionValidation = body("shortDescription")
 
 export const content = body("content")
   .isString()
-  .withMessage("Coontent should be string")
+  .withMessage("Content should be string")
   .trim()
   .isLength({ min: 1, max: 1000 })
   .withMessage("Length of name is not correct");

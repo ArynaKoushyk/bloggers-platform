@@ -1,5 +1,4 @@
-export type Post = DbPost &  {
- 
+export type Post = DbPost & {
   blogName: string;
 };
 

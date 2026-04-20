@@ -10,6 +10,7 @@ export function updatePostHandler(
 ) {
   const id = req.params.id;
   const post = postsRepository.findById(id);
+  
   if (!post) {
     return res
       .status(HttpStatus.NotFound)

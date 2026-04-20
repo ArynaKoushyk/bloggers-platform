@@ -15,7 +15,15 @@ export const postsRepository = {
     );
   },
 
-  createPost(newPost: DbPost): DbPost {
+  //!! мы в репозитории работаем с dto?
+  createPost(dto: PostInputDto): DbPost {
+    const newPost = {
+      id: Date.now().toString(),
+      title: dto.title,
+      shortDescription: dto.shortDescription,
+      content: dto.content,
+      blogId: dto.blogId,
+    };
     db.posts.push(newPost);
     return newPost;
   },

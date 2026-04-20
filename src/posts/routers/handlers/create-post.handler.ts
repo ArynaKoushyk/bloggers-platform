@@ -18,7 +18,6 @@ export function createPostHandler(
     return;
   }
   const postDto = {
-    id: Date.now().toString(),
     title: req.body.title,
     shortDescription: req.body.shortDescription,
     content: req.body.content,
