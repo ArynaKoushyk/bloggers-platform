@@ -3,7 +3,7 @@ export type Post = DbPost & {
 };
 
 export type DbPost = {
-  id: string;
+  id: string
   title: string;
   shortDescription: string;
   content: string;

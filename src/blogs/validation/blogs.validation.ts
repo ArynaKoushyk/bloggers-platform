@@ -2,8 +2,6 @@ import { param, body } from "express-validator";
 const URL_REGEX =
   /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/;
 
-
-
   //!! валидируем только входные данные ?
 export const nameValidation = body("name")
   .isString()
@@ -28,7 +26,7 @@ export const websiteUrlValidation = body("websiteUrl")
   .matches(URL_REGEX)
   .withMessage("Website URL must be a valid HTTPS URL");
 
-export const BlogInputDtoValidation = [
+export const blogInputDtoValidation = [
   nameValidation,
   descriptionValidation,
   websiteUrlValidation,

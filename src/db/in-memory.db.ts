@@ -25,5 +25,13 @@ export const db = {
       websiteUrl: "https://wanderlust.example.com",
     },
   ],
-  posts: <DbPost[]>[],
+  posts: <DbPost[]>[
+    {
+      id: "1",
+      title: "post",
+      shortDescription: "new post",
+      content: "video",
+      blogId: "1",
+    },
+  ],
 };

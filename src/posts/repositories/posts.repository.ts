@@ -3,8 +3,18 @@ import { DbPost, Post } from "../types/post.type";
 import { PostInputDto } from "../dto/post-input.dto";
 
 export const postsRepository = {
-  findAll(): DbPost[] {
-    return db.posts;
+  //!!
+  findAll(): Post[] {
+    return db.posts.map((p) => {
+      const blog = db.blogs.find((b) => b.id === p.blogId);
+      if (!blog) {
+        throw new Error("Blog not found");
+      }
+      return {
+        ...p,
+        blogName: blog.name,
+      };
+    });
   },
 
   findById(id: string): DbPost | null {
@@ -15,14 +25,10 @@ export const postsRepository = {
     );
   },
 
-  //!! мы в репозитории работаем с dto?
   createPost(dto: PostInputDto): DbPost {
     const newPost = {
+      ...dto,
       id: Date.now().toString(),
-      title: dto.title,
-      shortDescription: dto.shortDescription,
-      content: dto.content,
-      blogId: dto.blogId,
     };
     db.posts.push(newPost);
     return newPost;
@@ -35,10 +41,11 @@ export const postsRepository = {
     if (!post) {
       throw new Error("Post not found");
     }
-    ((post.title = dto.title),
-      (post.shortDescription = dto.shortDescription),
-      (post.content = dto.content),
-      (post.blogId = dto.blogId));
+    post.title = dto.title;
+    post.shortDescription = dto.shortDescription;
+    post.content = dto.content;
+    post.blogId = dto.blogId;
+
     return;
   },
 

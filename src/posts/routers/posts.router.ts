@@ -15,32 +15,29 @@ postsRouter.get("", getPostListHandler);
 
 postsRouter.get(
   "/:id",
-  idValidation,
   inputValidationResultMiddleware,
   getPostHandler,
 );
 
 postsRouter.post(
   "",
-  createPostHandler,
   superAdminGuardMiddleware,
   postInputValidation,
   inputValidationResultMiddleware,
+  createPostHandler,
 );
 
 postsRouter.put(
   "/:id",
-  updatePostHandler,
   superAdminGuardMiddleware,
-  idValidation,
   postInputValidation,
   inputValidationResultMiddleware,
+  updatePostHandler,
 );
 
 postsRouter.delete(
   "/:id",
-  idValidation,
   inputValidationResultMiddleware,
-  deletePostHandler,
   superAdminGuardMiddleware,
+  deletePostHandler,
 );
