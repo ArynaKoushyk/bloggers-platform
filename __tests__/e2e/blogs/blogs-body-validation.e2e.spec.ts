@@ -52,6 +52,15 @@ describe("Blogs API body validation check", () => {
         .set("Authorization", adminToken)
         .send(invalidData)
         .expect(HttpStatus.BadRequest);
+
+      expect(response.body).toEqual({
+        errorsMessages: expect.arrayContaining([
+          expect.objectContaining({
+            field,
+            message: expect.any(String),
+          }),
+        ]),
+      });
     },
   );
 });

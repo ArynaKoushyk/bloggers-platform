@@ -14,7 +14,7 @@ export async function updateBlog(
 ): Promise<void> {
   const defaultBlog: BlogInputDto = getBlogDto();
   const testBlogData = { ...defaultBlog, ...blogDto };
-  const updatedBlogResponse = await request(app)
+  await request(app)
     .put(`${BLOGS_PATH}/${blogId}`)
     .set("Authorization", generateBasicAuthToken())
     .send(testBlogData)

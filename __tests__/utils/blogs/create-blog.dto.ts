@@ -9,7 +9,7 @@ import { HttpStatus } from "../../../src/core/types/http-statuses";
 
 export async function createBlog(
   app: Express,
-  blogDto: BlogInputDto,
+  blogDto?: BlogInputDto,
 ): Promise<Blog> {
   const defaultBlog: BlogInputDto = getBlogDto();
   const testBlogData = { ...defaultBlog, ...blogDto };
