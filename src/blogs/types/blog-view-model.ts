@@ -3,6 +3,6 @@ export type BlogViewModel = {
   name: string;
   description: string;
   websiteUrl: string;
-  createdAt: Date;
+  createdAt: string
   isMembership: boolean;
 };
