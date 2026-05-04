@@ -2,12 +2,16 @@ import { Request, Response } from "express";
 import { blogsRepository } from "../../repositories/blogs.repository";
 import { HttpStatus } from "../../../core/types/http-statuses";
 import { createErrorMessages } from "../../../core/utils/error.utils";
+import { postsRepository } from "../../../posts/repositories/posts.repository";
 
-export function deleteBlogHandler(req: Request<{ id: string }>, res: Response) {
+export async function deleteBlogHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
   const id = req.params.id;
-  const blog = blogsRepository.findById(id);
+  const blog = await blogsRepository.findBlogById(id);
   if (!blog) {
-    res.status(HttpStatus.NotFound).send(
+    return res.status(HttpStatus.NotFound).send(
       createErrorMessages([
         {
           field: "id",
@@ -15,9 +19,8 @@ export function deleteBlogHandler(req: Request<{ id: string }>, res: Response) {
         },
       ]),
     );
-    return;
   }
-  blogsRepository.delete(id);
-  //!!надо писать return?
-  res.sendStatus(HttpStatus.NoContent);
+  await blogsRepository.deleteBlog(id);
+  await postsRepository.deletePostByBlogId(id);
+  return res.sendStatus(HttpStatus.NoContent);
 }

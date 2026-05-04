@@ -1,24 +1,23 @@
 import { ObjectId, WithId } from "mongodb";
-import { db } from "../../db/in-memory.db";
 import { BlogInputDto } from "../dto/blog-input.dto";
 import { Blog } from "../types/blogs.type";
 import { blogCollection } from "../../db/mongo.db";
 
 export const blogsRepository = {
-  async findAll(): Promise<WithId<Blog>[]> {
+  async findAllBlogs(): Promise<WithId<Blog>[]> {
     return blogCollection.find().toArray();
   },
 
-  async findById(id: string): Promise<WithId<Blog> | null> {
+  async findBlogById(id: string): Promise<WithId<Blog> | null> {
     return blogCollection.findOne({ _id: new ObjectId(id) });
   },
 
-  async create(newBlog: Blog): Promise<WithId<Blog>> {
+  async createBlog(newBlog: Blog): Promise<WithId<Blog>> {
     const insertResult = await blogCollection.insertOne(newBlog);
     return { ...newBlog, _id: insertResult.insertedId };
   },
 
-  async update(id: string, dto: BlogInputDto): Promise<void> {
+  async updateBlog(id: string, dto: BlogInputDto): Promise<void> {
     const updateResult = await blogCollection.updateOne(
       {
         _id: new ObjectId(id),
@@ -39,7 +38,7 @@ export const blogsRepository = {
     return;
   },
 
-  async delete(id: string): Promise<void> {
+  async deleteBlog(id: string): Promise<void> {
     const deleteResult = await blogCollection.deleteOne({
       _id: new ObjectId(id),
     });

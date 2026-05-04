@@ -4,11 +4,11 @@ import { ObjectId, WithId } from "mongodb";
 import { postCollection } from "../../db/mongo.db";
 
 export const postsRepository = {
-  async findAll(): Promise<WithId<Post>[]> {
+  async findAllPosts(): Promise<WithId<Post>[]> {
     return postCollection.find().toArray();
   },
 
-  async findById(id: string): Promise<WithId<Post> | null> {
+  async findPostById(id: string): Promise<WithId<Post> | null> {
     return postCollection.findOne({ _id: new ObjectId(id) });
   },
 
@@ -45,5 +45,9 @@ export const postsRepository = {
       throw new Error("Post not exist");
     }
     return;
+  },
+
+  async deletePostByBlogId(blogId: string): Promise<void> {
+    await postCollection.deleteMany({ blogId: blogId });
   },
 };

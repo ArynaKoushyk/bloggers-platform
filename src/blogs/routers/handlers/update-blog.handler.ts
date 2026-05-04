@@ -4,15 +4,15 @@ import { HttpStatus } from "../../../core/types/http-statuses";
 import { createErrorMessages } from "../../../core/utils/error.utils";
 import { BlogInputDto } from "../../dto/blog-input.dto";
 
-//!!типизация ??
-export function updateBlogHandler(
+
+export async  function updateBlogHandler(
   req: Request<{ id: string }, {}, BlogInputDto>,
   res: Response,
 ) {
   const id = req.params.id;
-  const blog = blogsRepository.findById(id);
+  const blog = await blogsRepository.findBlogById(id);
   if (!blog) {
-    res.status(HttpStatus.NotFound).send(
+   return  res.status(HttpStatus.NotFound).send(
       createErrorMessages([
         {
           field: "id",
@@ -20,8 +20,8 @@ export function updateBlogHandler(
         },
       ]),
     );
-    return;
+
   }
-  blogsRepository.update(id, req.body);
-  res.sendStatus(HttpStatus.NoContent);
+  await blogsRepository.updateBlog(id, req.body);
+ return  res.sendStatus(HttpStatus.NoContent);
 }

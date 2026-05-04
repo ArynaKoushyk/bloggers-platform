@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { db } from "../../db/in-memory.db";
+import { Request, Response, Router } from "express";
+import { blogCollection, postCollection } from "../../db/mongo.db";
+import { HttpStatus } from "../../core/types/http-statuses";
 export const testingRouter = Router({});
-testingRouter.delete("/all-data", (req, res) => {
+testingRouter.delete("/all-data", (req: Request, res: Response) => {
   console.log("data deleted");
-  db.blogs.length = 0;
-  db.posts.length = 0;
-  return res.sendStatus(204);
+  Promise.all([blogCollection.deleteMany(), postCollection.deleteMany()]);
+  return res.sendStatus(HttpStatus.NoContent);
 });

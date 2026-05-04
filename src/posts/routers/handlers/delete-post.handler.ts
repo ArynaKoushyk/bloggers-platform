@@ -3,15 +3,15 @@ import { postsRepository } from "../../repositories/posts.repository";
 import { HttpStatus } from "../../../core/types/http-statuses";
 import { createErrorMessages } from "../../../core/utils/error.utils";
 
-export function deletePostHandler(req: Request<{ id: string }>, res: Response) {
+export async function deletePostHandler(req: Request<{ id: string }>, res: Response) {
   const id = req.params.id;
-  const post = postsRepository.findById(id);
+  const post =  await postsRepository.findPostById(id);
   if (!post) {
     res
       .status(HttpStatus.NotFound)
       .send(createErrorMessages([{ field: "id", message: "Post not found" }]));
       return
   }
-  postsRepository.deletePost(id);
+  await postsRepository.deletePost(id);
  return res.sendStatus(HttpStatus.NoContent);
 }
