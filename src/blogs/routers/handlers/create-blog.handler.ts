@@ -1,23 +1,25 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { BlogInputDto } from "../../dto/blog-input.dto";
-import { blogsRepository } from "../../repositories/blogs.repository";
 import { HttpStatus } from "../../../core/types/http-statuses";
-import { Blog } from "../../types/blogs.type";
 import { BlogViewModel } from "../../types/blog-view-model";
-import { mapToBlogViewModel } from "../../mappers/map-to-blog-view-model.util";
+import { mapToBlogViewModel } from "../mappers/map-to-blog-view-model.util";
+import { blogsService } from "../../applications/blogs.service";
+import { RequestWithBody } from "../../../core/types/requests";
+import { ResultStatus } from "../../../core/result/resultCode";
+import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
+import { APIErrorResult } from "../../../core/result/result.type";
 
 export async function createBlogHandler(
-  req: Request<{}, {}, BlogInputDto>,
-  res: Response<BlogViewModel>,
+  req: RequestWithBody<BlogInputDto>,
+  res: Response<BlogViewModel | APIErrorResult>,
 ) {
-  const newBlog: Blog = {
-    name: req.body.name,
-    description: req.body.description,
-    websiteUrl: req.body.websiteUrl,
-    createdAt: new Date().toISOString(),
-    isMembership: false,
-  };
-  const createdBlog = await blogsRepository.createBlog(newBlog);
-  const blogViewModel = mapToBlogViewModel(createdBlog);
-  res.status(HttpStatus.Created).send(blogViewModel);
+  const newBlog = req.body;
+  const result = await blogsService.createBlog(newBlog);
+  if (result.status !== ResultStatus.Success) {
+    return res.status(resultCodeToHttpException(result.status)).send({
+      errorsMessages: result.errorsMessages,
+    });
+  }
+  const blogViewModel = mapToBlogViewModel(result.data);
+  return res.status(HttpStatus.Created).send(blogViewModel);
 }

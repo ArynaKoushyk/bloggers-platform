@@ -4,29 +4,17 @@ import { HttpStatus } from "../../../core/types/http-statuses";
 import { createErrorMessages } from "../../../core/utils/error.utils";
 import { blogsRepository } from "../../../blogs/repositories/blogs.repository";
 import { mapToPostViewModel } from "../../mappers/map-to-post-view-model.util";
+import { postsService } from "../../applications/posts.service";
+import { ResultStatus } from "../../../core/result/resultCode";
+import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
 
-export async function getPostHandler(
-  req: Request<{ id: string }>,
-  res: Response,
-) {
+export async function getPostHandler(req: Request<{ id: string }>, res: Response) {
   const id = req.params.id;
-  const post = await postsRepository.findPostById(id);
-  if (!post) {
-    return res.status(HttpStatus.NotFound).send(
-      createErrorMessages([
-        {
-          field: "id",
-          message: "Post not found",
-        },
-      ]),
-    );
+  const result = await postsService.findPostById(id);
+
+  if (result.status !== ResultStatus.Success) {
+    return res.sendStatus(resultCodeToHttpException(result.status));
   }
-  const blog = await blogsRepository.findBlogById(post.blogId);
-  if (!blog) {
-    return res
-      .status(HttpStatus.NotFound)
-      .send(createErrorMessages([{ field: "id", message: "Blog not found" }]));
-  }
-  const postViewModel = mapToPostViewModel(post, blog.name);
+  const postViewModel = mapToPostViewModel(result.data);
   return res.status(HttpStatus.Ok).send(postViewModel);
 }

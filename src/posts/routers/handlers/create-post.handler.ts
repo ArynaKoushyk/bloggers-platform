@@ -4,31 +4,26 @@ import { blogsRepository } from "../../../blogs/repositories/blogs.repository";
 import { HttpStatus } from "../../../core/types/http-statuses";
 import { createErrorMessages } from "../../../core/utils/error.utils";
 import { postsRepository } from "../../repositories/posts.repository";
-import { Post } from "../../types/post.type";
+import { Post } from "../../types/domain/post.type";
 import { mapToPostViewModel } from "../../mappers/map-to-post-view-model.util";
+import { postsService } from "../../applications/posts.service";
+import { RequestWithBody } from "../../../core/types/requests";
+import { PostViewModel } from "../../types/post-view-model";
+import { APIErrorResult } from "../../../core/result/result.type";
+import { ResultStatus } from "../../../core/result/resultCode";
+import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
 
 export async function createPostHandler(
-  req: Request<{}, {}, PostInputDto>,
-  res: Response,
+  req: RequestWithBody<PostInputDto>,
+  res: Response<PostViewModel | APIErrorResult>,
 ) {
-  const blogId = req.body.blogId;
-  const blog = await blogsRepository.findBlogById(blogId);
-
-  if (!blog) {
-    return res
-      .status(HttpStatus.NotFound)
-      .send(createErrorMessages([{ field: "id", message: "Blog not found" }]));
+  const newPost = req.body;
+  const result = await postsService.createPost(newPost);
+  if (result.status !== ResultStatus.Success) {
+    return res.status(resultCodeToHttpException(result.status)).send({
+      errorsMessages: result.errorsMessages,
+    });
   }
-
-  const newPost: Post = {
-    title: req.body.title,
-    shortDescription: req.body.shortDescription,
-    content: req.body.content,
-    blogId: blogId,
-    createdAt: new Date().toISOString(),
-  };
-
-  const createdPost = await postsRepository.createPost(newPost);
-  const postViewModel = mapToPostViewModel(createdPost, blog.name);
+  const postViewModel = mapToPostViewModel(result.data);
   return res.status(HttpStatus.Created).send(postViewModel);
 }

@@ -1,29 +1,24 @@
 import { Request, Response } from "express";
-import { postsRepository } from "../../repositories/posts.repository";
 import { HttpStatus } from "../../../core/types/http-statuses";
-import { createErrorMessages } from "../../../core/utils/error.utils";
 import { PostInputDto } from "../../dto/post-input.dto";
-import { blob } from "node:stream/consumers";
-import { blogsRepository } from "../../../blogs/repositories/blogs.repository";
+import { postsService } from "../../applications/posts.service";
+import { ResultStatus } from "../../../core/result/resultCode";
+import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
 
 export async function updatePostHandler(
   req: Request<{ id: string }, {}, PostInputDto>,
   res: Response,
 ) {
   const id = req.params.id;
-  const post = await postsRepository.findPostById(id);
+  const result = await postsService.updatePost(id, req.body);
 
-  if (!post) {
+  if (result.status === ResultStatus.BadRequest) {
     return res
-      .status(HttpStatus.NotFound)
-      .send(createErrorMessages([{ field: "id", message: "Post not found" }]));
+      .status(resultCodeToHttpException(result.status))
+      .send({ errorsMessages: result.errorsMessages });
   }
-  const blog = await blogsRepository.findBlogById(req.body.blogId);
-  if (!blog) {
-    return res
-      .status(HttpStatus.NotFound)
-      .send(createErrorMessages([{ field: "id", message: "Blog not found" }]));
+  if (result.status !== ResultStatus.Success) {
+    return res.sendStatus(resultCodeToHttpException(result.status));
   }
-  await postsRepository.updatePost(id, req.body);
   return res.sendStatus(HttpStatus.NoContent);
 }

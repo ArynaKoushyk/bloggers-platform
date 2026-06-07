@@ -7,10 +7,11 @@ export const blogIdValidation = body("blogId")
   .withMessage("ID must be a string")
   .isLength({ min: 1 })
   .withMessage("ID must not be empty")
-  .isNumeric()
-  .withMessage("ID must be a numeric string");
+  .isMongoId()
+  .withMessage("Incorrect format of ObjectId");
 
 export const titleValidation = body("title")
+  .exists()
   .isString()
   .withMessage("Title should be a string")
   .trim()
@@ -18,13 +19,15 @@ export const titleValidation = body("title")
   .withMessage("Length of name is not correct");
 
 export const shortDescriptionValidation = body("shortDescription")
+  .exists()
   .isString()
   .withMessage("Description should be string")
   .trim()
   .isLength({ min: 1, max: 100 })
   .withMessage("Length of name is not correct");
 
-export const content = body("content")
+export const contentValidation = body("content")
+  .exists()
   .isString()
   .withMessage("Content should be string")
   .trim()
@@ -35,5 +38,11 @@ export const postInputValidation = [
   blogIdValidation,
   titleValidation,
   shortDescriptionValidation,
-  content,
+  contentValidation,
+];
+
+export const postInputWithoutBlogIdValidation = [
+  titleValidation,
+  shortDescriptionValidation,
+  contentValidation,
 ];

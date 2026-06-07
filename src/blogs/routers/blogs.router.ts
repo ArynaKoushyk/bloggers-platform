@@ -5,20 +5,27 @@ import { getBlogHandler } from "./handlers/get-blog.handler";
 import { createBlogHandler } from "./handlers/create-blog.handler";
 import { updateBlogHandler } from "./handlers/update-blog.handler";
 import { deleteBlogHandler } from "./handlers/delete-blog.handler";
-import { idValidation } from "../../core/validation/src/core/middlewares/validation/params-id.validation-middleware";
-import { inputValidationResultMiddleware } from "../../core/validation/src/core/middlewares/validation/input-validtion-result.middleware";
-import { postInputValidation } from "../../posts/validation/posts.validation";
+import { idValidation } from "../../core/validation/src/core/middlewares/validation/params-id-validation-middleware";
+
 import { blogInputDtoValidation } from "../validation/blogs.validation";
+import { inputValidationResultMiddleware } from "../../core/validation/src/core/middlewares/validation/input-validation-result.middleware";
+import { createPostByBlogIdHandler } from "../../posts/routers/handlers/create-posts-by-blogId.handler";
+import { getPostsByBlogIdHandler } from "../../posts/routers/handlers/get-posts-by-blogId.handler";
+import { postInputWithoutBlogIdValidation } from "../../posts/validation/posts.validation";
+import { blogQueryPaginationValidation } from "../validation/blogs-query.pagination.validation";
+import { paginationAndSortingValidation } from "../../core/validation/src/core/middlewares/validation/pagination-validation.middleware";
+import { postQueryPaginationValidation } from "../../posts/validation/post-query.pagination.validation";
+
 export const blogsRouter = Router({});
 
-blogsRouter.get("", getBlogListHandler);
-
 blogsRouter.get(
-  "/:id",
-  idValidation,
+  "",
+  blogQueryPaginationValidation,
   inputValidationResultMiddleware,
-  getBlogHandler,
+  getBlogListHandler,
 );
+
+blogsRouter.get("/:id", idValidation, inputValidationResultMiddleware, getBlogHandler);
 
 blogsRouter.post(
   "",
@@ -30,8 +37,8 @@ blogsRouter.post(
 
 blogsRouter.put(
   "/:id",
-  idValidation,
   superAdminGuardMiddleware,
+  idValidation,
   blogInputDtoValidation,
   inputValidationResultMiddleware,
   updateBlogHandler,
@@ -39,8 +46,27 @@ blogsRouter.put(
 
 blogsRouter.delete(
   "/:id",
-  idValidation,
+
   superAdminGuardMiddleware,
+  idValidation,
   inputValidationResultMiddleware,
   deleteBlogHandler,
+);
+
+blogsRouter.get(
+  "/:id/posts",
+  idValidation,
+  postQueryPaginationValidation,
+  inputValidationResultMiddleware,
+
+  getPostsByBlogIdHandler,
+);
+
+blogsRouter.post(
+  "/:id/posts",
+  superAdminGuardMiddleware,
+  idValidation,
+  postInputWithoutBlogIdValidation,
+  inputValidationResultMiddleware,
+  createPostByBlogIdHandler,
 );

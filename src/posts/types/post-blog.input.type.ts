@@ -1,7 +1,5 @@
-export type Post = {
+export type BlogPostModel = {
   title: string;
   shortDescription: string;
   content: string;
-  blogId: string;
-  createdAt: string;
 };

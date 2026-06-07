@@ -6,18 +6,20 @@ import { createPostHandler } from "./handlers/create-post.handler";
 import { updatePostHandler } from "./handlers/update-post.handler";
 import { postInputValidation } from "../validation/posts.validation";
 import { deletePostHandler } from "./handlers/delete-post.handler";
-import { idValidation } from "../../core/validation/src/core/middlewares/validation/params-id.validation-middleware";
-import { inputValidationResultMiddleware } from "../../core/validation/src/core/middlewares/validation/input-validtion-result.middleware";
+import { idValidation } from "../../core/validation/src/core/middlewares/validation/params-id-validation-middleware";
+import { inputValidationResultMiddleware } from "../../core/validation/src/core/middlewares/validation/input-validation-result.middleware";
+import { postQueryPaginationValidation } from "../validation/post-query.pagination.validation";
 
 export const postsRouter = Router({});
 
-postsRouter.get("", getPostListHandler);
-
 postsRouter.get(
-  "/:id",
+  "",
+  postQueryPaginationValidation,
   inputValidationResultMiddleware,
-  getPostHandler,
+  getPostListHandler,
 );
+
+postsRouter.get("/:id", idValidation, inputValidationResultMiddleware, getPostHandler);
 
 postsRouter.post(
   "",
@@ -30,6 +32,7 @@ postsRouter.post(
 postsRouter.put(
   "/:id",
   superAdminGuardMiddleware,
+  idValidation,
   postInputValidation,
   inputValidationResultMiddleware,
   updatePostHandler,
@@ -37,7 +40,8 @@ postsRouter.put(
 
 postsRouter.delete(
   "/:id",
-  inputValidationResultMiddleware,
   superAdminGuardMiddleware,
+  idValidation,
+  inputValidationResultMiddleware,
   deletePostHandler,
 );

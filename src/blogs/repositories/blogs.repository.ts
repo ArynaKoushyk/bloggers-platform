@@ -1,11 +1,28 @@
 import { ObjectId, WithId } from "mongodb";
-import { BlogInputDto } from "../dto/blog-input.dto";
-import { Blog } from "../types/blogs.type";
+import { Blog } from "../types/domain/blogs.type";
 import { blogCollection } from "../../db/mongo.db";
+import { BlogQueryInput } from "../types/blog-query.input";
 
 export const blogsRepository = {
-  async findAllBlogs(): Promise<WithId<Blog>[]> {
-    return blogCollection.find().toArray();
+  async findAllBlogs(
+    query: BlogQueryInput,
+  ): Promise<{ items: WithId<Blog>[]; totalCount: number }> {
+    const { pageNumber, pageSize, sortBy, sortDirection, searchNameTerm } = query;
+    const skip = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+    const filter: any = {};
+    if (searchNameTerm) {
+      filter.name = { $regex: searchNameTerm, $options: "i" };
+    }
+    const items = await blogCollection
+      .find(filter)
+      .sort({ [sortBy]: sortDirection })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const totalCount = await blogCollection.countDocuments(filter);
+    return { items, totalCount };
   },
 
   async findBlogById(id: string): Promise<WithId<Blog> | null> {
@@ -17,34 +34,28 @@ export const blogsRepository = {
     return { ...newBlog, _id: insertResult.insertedId };
   },
 
-  async updateBlog(id: string, dto: BlogInputDto): Promise<void> {
+  async updateBlog(id: string, blog: Partial<Blog>): Promise<boolean> {
+    const { name, description, websiteUrl } = blog;
     const updateResult = await blogCollection.updateOne(
       {
         _id: new ObjectId(id),
       },
       {
         $set: {
-          name: dto.name,
-          description: dto.description,
-          websiteUrl: dto.websiteUrl,
+          name,
+          description,
+          websiteUrl,
         },
       },
     );
 
-    if (updateResult.matchedCount < 1) {
-      throw new Error("Blog not exist");
-    }
-
-    return;
+    return updateResult.matchedCount === 1;
   },
 
-  async deleteBlog(id: string): Promise<void> {
+  async deleteBlog(id: string): Promise<boolean> {
     const deleteResult = await blogCollection.deleteOne({
       _id: new ObjectId(id),
     });
-    if (deleteResult.deletedCount < 1) {
-      throw new Error("Blog not exist");
-    }
-    return;
+    return deleteResult.deletedCount === 1;
   },
 };

@@ -1,53 +1,86 @@
-import { Post } from "../types/post.type";
-import { PostInputDto } from "../dto/post-input.dto";
+import { Post } from "../types/domain/post.type";
 import { ObjectId, WithId } from "mongodb";
-import { postCollection } from "../../db/mongo.db";
+import { blogCollection, postCollection } from "../../db/mongo.db";
+import { PostQueryInput } from "../types/post-query.input";
 
 export const postsRepository = {
-  async findAllPosts(): Promise<WithId<Post>[]> {
-    return postCollection.find().toArray();
+  async findAllPosts(
+    query: PostQueryInput,
+  ): Promise<{ items: WithId<Post>[]; totalCount: number }> {
+    const { pageNumber, pageSize, sortBy, sortDirection } = query;
+    const skip = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+    const filter: any = {};
+
+    const items = await postCollection
+      .find(filter)
+      .sort({ [sortBy]: sortDirection })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const totalCount = await postCollection.countDocuments(filter);
+    return { items, totalCount };
   },
 
   async findPostById(id: string): Promise<WithId<Post> | null> {
     return postCollection.findOne({ _id: new ObjectId(id) });
   },
 
-  async createPost(newPost: Post): Promise<WithId<Post>> {
-    const insertResult = await postCollection.insertOne(newPost);
-    return { ...newPost, _id: new ObjectId(insertResult.insertedId) };
+  async findPostsByBlogId(
+    blogId: string,
+    query: PostQueryInput,
+  ): Promise<{ items: WithId<Post>[]; totalCount: number }> {
+    const { pageNumber, pageSize, sortBy, sortDirection } = query;
+    const skip = (pageNumber - 1) * pageSize;
+    const limit = pageSize;
+    const filter = { blogId };
+
+    const items = await postCollection
+      .find(filter)
+      .sort({ [sortBy]: sortDirection })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    const totalCount = await postCollection.countDocuments(filter);
+    return { items, totalCount };
   },
 
-  async updatePost(id: string, dto: PostInputDto): Promise<void> {
+  async createPost(newPost: Post): Promise<WithId<Post>> {
+    const insertResult = await postCollection.insertOne(newPost);
+    return { ...newPost, _id: insertResult.insertedId };
+  },
+
+  async updatePost(id: string, post: Partial<Post>): Promise<boolean> {
+    const { title, shortDescription, content, blogId, blogName } = post;
     const updateResult = await postCollection.updateOne(
       {
         _id: new ObjectId(id),
       },
       {
         $set: {
-          title: dto.title,
-          shortDescription: dto.shortDescription,
-          content: dto.content,
-          blogId: dto.blogId,
+          title,
+          shortDescription,
+          content,
+          blogId,
+          blogName,
         },
       },
     );
-    if (updateResult.matchedCount < 1) {
-      throw new Error("Post not exist");
-    }
-    return;
+    return updateResult.matchedCount === 1;
   },
 
-  async deletePost(id: string): Promise<void> {
+  //!!выбрасывать ли ошибки в репо
+  async deletePost(id: string): Promise<boolean> {
     const deleteResult = await postCollection.deleteOne({
       _id: new ObjectId(id),
     });
-    if (deleteResult.deletedCount < 1) {
-      throw new Error("Post not exist");
-    }
-    return;
+    return deleteResult.deletedCount === 1;
   },
 
   async deletePostByBlogId(blogId: string): Promise<void> {
-    await postCollection.deleteMany({ blogId: blogId });
+    await postCollection.deleteMany({ blogId });
+    return;
   },
 };
