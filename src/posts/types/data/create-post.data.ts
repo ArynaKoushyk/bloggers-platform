@@ -1,8 +1,8 @@
-export type Post = {
+export type CreatePostData = {
   title: string;
   shortDescription: string;
   content: string;
   blogId: string;
-  createdAt?: string;
   blogName: string;
+  createdAt: string;
 };

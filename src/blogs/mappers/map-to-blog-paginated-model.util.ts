@@ -1,11 +1,11 @@
 import { WithId } from "mongodb";
-import { PaginatedViewModel } from "../../../core/types/paginated-view.model";
-import { Blog } from "../../types/domain/blogs.type";
-import { BlogViewModel } from "../../types/blog-view-model";
+import { PaginatedViewModel } from "../../core/types/paginated-view.model";
+import { BlogViewModel } from "../types/blog-view-model";
 import { mapToBlogViewModel } from "./map-to-blog-view-model.util";
+import { BlogDbModel } from "../types/blog-db.model";
 
 export function mapToPaginatedBlogViewModel(
-  data: PaginatedViewModel<WithId<Blog>>,
+  data: PaginatedViewModel<WithId<BlogDbModel>>,
 ): PaginatedViewModel<BlogViewModel> {
   return {
     pagesCount: data.pagesCount,

@@ -1,18 +1,19 @@
 import { Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
-import { blogsService } from "../../applications/blogs.service";
-import { postsService } from "../../../posts/applications/posts.service";
 import { RequestWithParams } from "../../../core/types/requests";
-import { APIErrorResult } from "../../../core/result/result.type";
 import { ResultStatus } from "../../../core/result/resultCode";
 import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
+import { deleteBlogWithPostsUseCase } from "../../composition/delete-blog-with-posts.container";
 
-export async function deleteBlogHandler(req: RequestWithParams<{ id: string }>, res: Response) {
-  const id = req.params.id;
-  const result = await blogsService.deleteBlog(id);
-  if (result.status !== ResultStatus.Success) {
-    return res.sendStatus(resultCodeToHttpException(result.status));
+export async function deleteBlogHandler(
+  req: RequestWithParams<{ id: string }>,
+  res: Response,
+) {
+  const blogId = req.params.id;
+  const deleteResult = await deleteBlogWithPostsUseCase.execute(blogId);
+  if (deleteResult.status !== ResultStatus.Success) {
+    return res.sendStatus(resultCodeToHttpException(deleteResult.status));
+  } else {
+    return res.sendStatus(HttpStatus.NoContent);
   }
-  await postsService.deletePostsByBlogId(id);
-  return res.sendStatus(HttpStatus.NoContent);
 }

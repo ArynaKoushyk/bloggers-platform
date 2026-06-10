@@ -1,7 +1,4 @@
-export type PostViewModel = {
-  id: string;
-  blogName: string;
-  createdAt: string;
+export type UpdatePostInputDto = {
   title: string;
   shortDescription: string;
   content: string;

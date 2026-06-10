@@ -1,15 +1,15 @@
 import { WithId } from "mongodb";
-import { PostViewModel } from "../types/post-view-model";
 import { PostDbModel } from "../types/post-db.model";
+import { PostEntity } from "../types/domain/post-entity.model";
 
-export function mapToPostViewModel(post: WithId<PostDbModel>): PostViewModel {
+export function mapPostDbToEntity(post: WithId<PostDbModel>): PostEntity {
   return {
     id: post._id.toString(),
-    blogName: post.blogName,
-    createdAt: post.createdAt,
     title: post.title,
     shortDescription: post.shortDescription,
     content: post.content,
     blogId: post.blogId,
+    blogName: post.blogName,
+    createdAt: post.createdAt,
   };
 }

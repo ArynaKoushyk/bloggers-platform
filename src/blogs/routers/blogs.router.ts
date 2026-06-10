@@ -9,12 +9,11 @@ import { idValidation } from "../../core/validation/src/core/middlewares/validat
 
 import { blogInputDtoValidation } from "../validation/blogs.validation";
 import { inputValidationResultMiddleware } from "../../core/validation/src/core/middlewares/validation/input-validation-result.middleware";
-import { createPostByBlogIdHandler } from "../../posts/routers/handlers/create-posts-by-blogId.handler";
-import { getPostsByBlogIdHandler } from "../../posts/routers/handlers/get-posts-by-blogId.handler";
+import { createPostByBlogIdHandler } from "../../posts/routers/handlers/create-post-by-blog-id.handler";
 import { postInputWithoutBlogIdValidation } from "../../posts/validation/posts.validation";
 import { blogQueryPaginationValidation } from "../validation/blogs-query.pagination.validation";
-import { paginationAndSortingValidation } from "../../core/validation/src/core/middlewares/validation/pagination-validation.middleware";
 import { postQueryPaginationValidation } from "../../posts/validation/post-query.pagination.validation";
+import { getPostsByBlogIdHandler } from "../../posts/routers/handlers/get-posts-by-blog-id.handler";
 
 export const blogsRouter = Router({});
 
@@ -58,7 +57,6 @@ blogsRouter.get(
   idValidation,
   postQueryPaginationValidation,
   inputValidationResultMiddleware,
-
   getPostsByBlogIdHandler,
 );
 

@@ -1,24 +1,23 @@
 import { Response } from "express";
 import { HttpStatus } from "../../../core/types/http-statuses";
-import { RequestWithBody } from "../../../core/types/requests";
 import { PostViewModel } from "../../types/post-view-model";
-import { APIErrorResult } from "../../../core/result/result.type";
+import { RequestWithParamsAndBody } from "../../../core/types/requests";
 import { ResultStatus } from "../../../core/result/resultCode";
 import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
-import { CreatePostInputDto } from "../../dto/create-post.input.dto";
+import { APIErrorResult } from "../../../core/result/result.type";
+import { CreatePostByBlogIdInputDto } from "../../dto/create-post-by-blog-id.input.dto";
 import { postsService } from "../../composition/posts.container";
 import { getPostQueryHandler } from "../../queries/get-post.query-handler";
 
-export async function createPostHandler(
-  req: RequestWithBody<CreatePostInputDto>,
+export async function createPostByBlogIdHandler(
+  req: RequestWithParamsAndBody<{ id: string }, CreatePostByBlogIdInputDto>,
   res: Response<PostViewModel | APIErrorResult>,
 ) {
   const createDto = req.body;
-  const createResult = await postsService.createPost(createDto);
+  const blogId = req.params.id;
+  const createResult = await postsService.createPostByBlogId(blogId, createDto);
   if (createResult.status !== ResultStatus.Success) {
-    return res.status(resultCodeToHttpException(createResult.status)).send({
-      errorsMessages: createResult.errorsMessages,
-    });
+    return res.sendStatus(resultCodeToHttpException(createResult.status));
   }
   const postId = createResult.data;
   const createdPostResult = await getPostQueryHandler.findPostById(postId);
@@ -27,5 +26,6 @@ export async function createPostHandler(
       errorsMessages: createdPostResult.errorsMessages,
     });
   }
-  return res.status(HttpStatus.Created).send(createdPostResult.data);
+
+  res.status(HttpStatus.Created).send(createdPostResult.data);
 }

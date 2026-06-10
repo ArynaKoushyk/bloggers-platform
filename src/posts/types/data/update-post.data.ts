@@ -1,9 +1,7 @@
-export type PostViewModel = {
-  id: string;
-  blogName: string;
-  createdAt: string;
+export type UpdatePostData = {
   title: string;
   shortDescription: string;
   content: string;
   blogId: string;
+  blogName: string;
 };

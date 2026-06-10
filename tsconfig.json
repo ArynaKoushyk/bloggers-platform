@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/posts/routers/handlers/get-posts-by-blog-id.handler.ts"],
   "exclude": ["dist", "node_modules", "__tests__"]
 }
