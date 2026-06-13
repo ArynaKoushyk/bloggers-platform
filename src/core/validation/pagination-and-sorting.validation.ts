@@ -1,5 +1,5 @@
 import { query } from "express-validator";
-import { SortDirection } from "../../../../../types/sort-direction";
+import { SortDirection } from "../types/sort-direction";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
@@ -8,7 +8,6 @@ const DEFAULT_SORT_DIRECTION = SortDirection.Desc;
 export function paginationAndSortingValidation<T extends string>(
   sortFieldsEnum: Record<string, T>,
 ) {
-  //Record<string, T> - тип объекта, где ключи типа string, значения типа Т
   return [
     query("pageNumber")
       .default(DEFAULT_PAGE)
@@ -23,7 +22,7 @@ export function paginationAndSortingValidation<T extends string>(
       .toInt(),
 
     query("sortBy")
-      .default(Object.values(sortFieldsEnum)[0]) // Дефолтное значение - первое поле
+      .default(Object.values(sortFieldsEnum)[0])
       .isIn(Object.values(sortFieldsEnum))
       .withMessage(`Allowed sort fields: ${Object.values(sortFieldsEnum).join(", ")}`),
 

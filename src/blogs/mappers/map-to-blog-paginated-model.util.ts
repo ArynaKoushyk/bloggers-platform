@@ -14,4 +14,5 @@ export function mapToPaginatedBlogViewModel(
     totalCount: data.totalCount,
     items: data.items.map(mapToBlogViewModel),
   };
+  
 }

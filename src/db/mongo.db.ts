@@ -2,13 +2,16 @@ import { Collection, Db, MongoClient } from "mongodb";
 import { SETTINGS } from "../core/settings/settings";
 import { BlogDbModel } from "../blogs/types/blog-db.model";
 import { PostDbModel } from "../posts/types/post-db.model";
+import { UserDbModel } from "../users/types/user-db.model";
 
 const BLOG_COLLECTION_NAME = "blogs";
 const POST_COLLECTION_NAME = "posts";
+const USER_COLLECTION_NAME = "users";
 
 export let client: MongoClient;
 export let blogCollection: Collection<BlogDbModel>;
 export let postCollection: Collection<PostDbModel>;
+export let userCollection: Collection<UserDbModel>;
 
 export async function runDb(url: string): Promise<void> {
   client = new MongoClient(url);
@@ -16,6 +19,7 @@ export async function runDb(url: string): Promise<void> {
 
   blogCollection = db.collection<BlogDbModel>(BLOG_COLLECTION_NAME);
   postCollection = db.collection<PostDbModel>(POST_COLLECTION_NAME);
+  userCollection = db.collection<UserDbModel>(USER_COLLECTION_NAME);
   try {
     await client.connect();
     await db.command({ ping: 1 });

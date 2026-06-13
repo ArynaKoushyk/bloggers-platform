@@ -11,15 +11,18 @@ export const getBlogsListQueryHandler = {
     query: BlogQueryInput,
   ): Promise<Result<PaginatedViewModel<BlogViewModel>>> {
     const { items, totalCount } = await blogsQueryRepository.findAllBlogs(query);
+
+    const paginatedBlogs = mapToPaginatedBlogViewModel({
+      pagesCount: Math.ceil(totalCount / query.pageSize),
+      page: query.pageNumber,
+      pageSize: query.pageSize,
+      totalCount,
+      items,
+    });
+    
     return {
       status: ResultStatus.Success,
-      data: mapToPaginatedBlogViewModel({
-        pagesCount: Math.ceil(totalCount / query.pageSize),
-        page: query.pageNumber,
-        pageSize: query.pageSize,
-        totalCount,
-        items,
-      }),
+      data: paginatedBlogs,
       errorsMessages: null,
     };
   },

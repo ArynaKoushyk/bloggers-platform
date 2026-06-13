@@ -11,15 +11,18 @@ export const getPostListQueryHandler = {
     query: PostQueryInput,
   ): Promise<Result<PaginatedViewModel<PostViewModel>>> {
     const { items, totalCount } = await postsQueryRepository.findAllPosts(query);
+
+    const paginatedPosts = mapToPaginatedPostViewModel({
+      pagesCount: Math.ceil(totalCount / query.pageSize),
+      page: query.pageNumber,
+      pageSize: query.pageSize,
+      totalCount,
+      items,
+    });
+
     return {
       status: ResultStatus.Success,
-      data: mapToPaginatedPostViewModel({
-        pagesCount: Math.ceil(totalCount / query.pageSize),
-        page: query.pageNumber,
-        pageSize: query.pageSize,
-        totalCount,
-        items,
-      }),
+      data: paginatedPosts,
       errorsMessages: null,
     };
   },

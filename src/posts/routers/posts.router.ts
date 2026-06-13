@@ -4,27 +4,28 @@ import { getPostHandler } from "./handlers/get-post.handler";
 import { getPostListHandler } from "./handlers/get-post-list.handler";
 import { createPostHandler } from "./handlers/create-post.handler";
 import { updatePostHandler } from "./handlers/update-post.handler";
-import { postInputValidation } from "../validation/posts.validation";
+import { createPostInputValidation } from "../validation/create-post.input.validation";
 import { deletePostHandler } from "./handlers/delete-post.handler";
-import { idValidation } from "../../core/validation/src/core/middlewares/validation/params-id-validation-middleware";
-import { inputValidationResultMiddleware } from "../../core/validation/src/core/middlewares/validation/input-validation-result.middleware";
-import { postQueryPaginationValidation } from "../validation/post-query.pagination.validation";
+import { idParamValidation } from "../../core/validation/id-param.validation";
+import { inputValidationResultMiddleware } from "../../core/validation/input-validation-result.middleware";
+import { postQueryValidation } from "../validation/post-query.validation";
+import { updatePostInputValidation } from "../validation/update-post.input.validation";
 
 export const postsRouter = Router({});
 
 postsRouter.get(
   "",
-  postQueryPaginationValidation,
+  postQueryValidation,
   inputValidationResultMiddleware,
   getPostListHandler,
 );
 
-postsRouter.get("/:id", idValidation, inputValidationResultMiddleware, getPostHandler);
+postsRouter.get("/:id", idParamValidation, inputValidationResultMiddleware, getPostHandler);
 
 postsRouter.post(
   "",
   superAdminGuardMiddleware,
-  postInputValidation,
+  createPostInputValidation,
   inputValidationResultMiddleware,
   createPostHandler,
 );
@@ -32,8 +33,8 @@ postsRouter.post(
 postsRouter.put(
   "/:id",
   superAdminGuardMiddleware,
-  idValidation,
-  postInputValidation,
+  idParamValidation,
+  updatePostInputValidation,
   inputValidationResultMiddleware,
   updatePostHandler,
 );
@@ -41,7 +42,7 @@ postsRouter.put(
 postsRouter.delete(
   "/:id",
   superAdminGuardMiddleware,
-  idValidation,
+  idParamValidation,
   inputValidationResultMiddleware,
   deletePostHandler,
 );

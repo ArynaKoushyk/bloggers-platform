@@ -12,6 +12,8 @@ export const mongoBlogsRepository: BlogsRepository = {
     const document = await blogCollection.findOne({ _id: new ObjectId(id) });
     if (!document) {
       return null;
+
+      
     }
     return mapBlogDbToEntity(document);
   },

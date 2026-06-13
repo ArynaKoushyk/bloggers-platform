@@ -11,4 +11,5 @@ export function mapToBlogViewModel(blog: WithId<BlogDbModel>): BlogViewModel {
     createdAt: blog.createdAt,
     isMembership: blog.isMembership,
   };
+  
 }

@@ -10,6 +10,6 @@ export function mapBlogDbToEntity(blog: WithId<BlogDbModel>): BlogEntity {
     websiteUrl: blog.websiteUrl,
     createdAt: blog.createdAt,
     isMembership: blog.isMembership,
-  };
+  }; 
 }
 
