@@ -1,5 +1,14 @@
 import { Request } from "express";
 import { IdType } from "./id";
+import { AuthUserType } from "../../auth/types/auth-user.type";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: AuthUserType;
+    }
+  }
+}
 
 export type RequestWithBody<B> = Request<{}, {}, B>;
 export type RequestWithQuery<Q> = Request<{}, {}, {}, Q>;

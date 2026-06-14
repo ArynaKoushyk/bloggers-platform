@@ -18,14 +18,9 @@ import { updateBlogInputValidation } from "../validation/update-blog.input.valid
 
 export const blogsRouter = Router({});
 
-blogsRouter.get(
-  "",
-  blogQueryValidation,
-  inputValidationResultMiddleware,
-  getBlogListHandler,
-);
+blogsRouter.get("", blogQueryValidation, inputValidationResultMiddleware, getBlogListHandler);
 
-blogsRouter.get("/:id", idParamValidation, inputValidationResultMiddleware, getBlogHandler);
+blogsRouter.get("/:id", idParamValidation("id"), inputValidationResultMiddleware, getBlogHandler);
 
 blogsRouter.post(
   "",
@@ -38,7 +33,7 @@ blogsRouter.post(
 blogsRouter.put(
   "/:id",
   superAdminGuardMiddleware,
-  idParamValidation,
+  idParamValidation("id"),
   updateBlogInputValidation,
   inputValidationResultMiddleware,
   updateBlogHandler,
@@ -48,14 +43,14 @@ blogsRouter.delete(
   "/:id",
 
   superAdminGuardMiddleware,
-  idParamValidation,
+  idParamValidation("id"),
   inputValidationResultMiddleware,
   deleteBlogHandler,
 );
 
 blogsRouter.get(
   "/:id/posts",
-  idParamValidation,
+  idParamValidation("id"),
   postQueryValidation,
   inputValidationResultMiddleware,
   getPostsByBlogIdHandler,
@@ -64,7 +59,7 @@ blogsRouter.get(
 blogsRouter.post(
   "/:id/posts",
   superAdminGuardMiddleware,
-  idParamValidation,
+  idParamValidation("id"),
   createPostByBlogIdInputValidation,
   inputValidationResultMiddleware,
   createPostByBlogIdHandler,

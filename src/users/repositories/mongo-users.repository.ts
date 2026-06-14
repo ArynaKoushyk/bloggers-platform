@@ -33,6 +33,8 @@ export const mongoUsersRepository: UsersRepository = {
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
     });
     if (!document) {
+
+  
       return null;
     }
     return mapUserDbToEntity(document);

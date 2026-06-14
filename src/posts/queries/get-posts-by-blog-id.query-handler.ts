@@ -1,4 +1,5 @@
 import { blogsQueryRepository } from "../../blogs/repositories/mongo-blogs.query-repository";
+import { mongoBlogsRepository } from "../../blogs/repositories/mongo-blogs.repository";
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { PaginatedViewModel } from "../../core/types/paginated-view.model";
@@ -12,7 +13,8 @@ export const getPostsByBlogIdQueryHandler = {
     blogId: string,
     query: PostQueryInput,
   ): Promise<Result<PaginatedViewModel<PostViewModel>>> {
-    const blog = await blogsQueryRepository.findBlogById(blogId);
+    //!!брать лучше из квери репозитория или из комманд репо
+    const blog = await mongoBlogsRepository.findBlogById(blogId);
     if (!blog) {
       return {
         status: ResultStatus.NotFound,
@@ -20,8 +22,7 @@ export const getPostsByBlogIdQueryHandler = {
         errorsMessages: null,
       };
     }
-    const id = blog._id.toString();
-    const { items, totalCount } = await postsQueryRepository.findPostsByBlogId(id, query);
+    const { items, totalCount } = await postsQueryRepository.findPostsByBlogId(blog.id, query);
 
     return {
       status: ResultStatus.Success,

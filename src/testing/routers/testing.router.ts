@@ -1,5 +1,10 @@
 import { Request, Response, Router } from "express";
-import { blogCollection, postCollection, userCollection } from "../../db/mongo.db";
+import {
+  blogCollection,
+  commentCollection,
+  postCollection,
+  userCollection,
+} from "../../db/mongo.db";
 import { HttpStatus } from "../../core/types/http-statuses";
 export const testingRouter = Router({});
 testingRouter.delete("/all-data", async (req: Request, res: Response) => {
@@ -8,6 +13,7 @@ testingRouter.delete("/all-data", async (req: Request, res: Response) => {
     blogCollection.deleteMany({}),
     postCollection.deleteMany({}),
     userCollection.deleteMany({}),
+    commentCollection.deleteMany({}),
   ]);
   return res.sendStatus(HttpStatus.NoContent);
 });

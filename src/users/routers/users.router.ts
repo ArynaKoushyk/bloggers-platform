@@ -27,7 +27,7 @@ usersRouter.post(
 usersRouter.delete(
   "/:id",
   superAdminGuardMiddleware,
-  idParamValidation,
+  idParamValidation('id'),
   inputValidationResultMiddleware,
   deleteUserHandler,
 );

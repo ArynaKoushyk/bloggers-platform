@@ -10,9 +10,6 @@ import { UpdateBlogInputDto } from '../dto/update-blog.input.dto';
 
 export const createBlogsService = (blogsRepository: BlogsRepository): BlogsService => {
   return {
-    
-
-    
     async findBlogById(id: string): Promise<Result<BlogEntity>> {
       const blog = await blogsRepository.findBlogById(id);
       if (!blog) {
