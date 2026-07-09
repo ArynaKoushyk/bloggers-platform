@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../types/http-statuses";
 import { ValidationErrorType } from "../utils/validation-error";
 
+
+//TODO: СОБИРАЕТ ОШИБКИ ВАЛИДАЦИИ ???
 const formatErrors = (error: ValidationError): ValidationErrorType => {
   const expressError = error as unknown as FieldValidationError;
 

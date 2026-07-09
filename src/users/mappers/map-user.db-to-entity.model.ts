@@ -9,5 +9,10 @@ export function mapUserDbToEntity(user: WithId<UserDbModel>): UserEntity {
     email: user.email,
     passwordHash: user.passwordHash,
     createdAt: user.createdAt,
+    emailConfirmation: {
+      confirmationCode: user.emailConfirmation.confirmationCode,
+      expirationDate: user.emailConfirmation.expirationDate,
+      isConfirmed: user.emailConfirmation.isConfirmed,
+    },
   };
 }

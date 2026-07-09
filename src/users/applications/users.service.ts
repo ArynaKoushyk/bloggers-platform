@@ -52,6 +52,11 @@ export const createUsersService = (
         email,
         passwordHash,
         createdAt: new Date().toISOString(),
+        emailConfirmation: {
+          confirmationCode: "",
+          expirationDate: new Date(),
+          isConfirmed: true,
+        },
       };
       const userId = await usersRepository.createUser(createData);
       return {
