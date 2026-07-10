@@ -14,12 +14,22 @@ import { EmailService } from "./types/email.service.type";
 import { emailTemplates } from "../adapters/email-templates";
 import { RegistrationConfirmationInputDto } from "../dto/registration-confirmation.input.dto";
 import { RegistrationEmailResendingInputDto } from "../dto/registration-email-resending.input.dto";
+import { RefreshTokenPayloadType } from "../types/refresh-session/refresh-token-payload.type";
+import { RefreshSessionRepository } from "./types/refresh-session.repository.type";
+import { CreateRefreshSessionData } from "../types/refresh-session/data/create-refresh-session.data";
+import { RotateRefreshSessionData } from "../types/refresh-session/data/rotate-refresh-session.data";
+import { JwtPayloadType } from "../types/jwt-payload.type";
+import { RefreshTokenSuccessViewModel } from "../types/refresh-session/refresh-token-success-view-model";
+
+//!! поговорить про black и white list
+const REFRESH_SESSION_LIFETIME_SECONDS = 20;
 
 export const createAuthService = (
   usersRepository: UsersRepository,
   passwordHashService: PasswordHashService,
   jwtService: JwtService,
   emailService: EmailService,
+  refreshSessionRepository: RefreshSessionRepository,
 ): AuthService => {
   const checkUserCredentials = async (
     loginOrEmail: string,
@@ -52,10 +62,177 @@ export const createAuthService = (
         };
       }
       const accessToken = await jwtService.createAccessToken({ userId: user.id });
+      const refreshTokenPayload: RefreshTokenPayloadType = {
+        userId: user.id,
+        jti: crypto.randomUUID(),
+        sessionId: crypto.randomUUID(),
+        tokenType: "refresh",
+      };
+      const refreshToken = await jwtService.createRefreshToken(refreshTokenPayload);
+      const issuedAt = new Date();
+      const expiresAt = add(issuedAt, { seconds: REFRESH_SESSION_LIFETIME_SECONDS });
+      const refreshSessionData: CreateRefreshSessionData = {
+        userId: user.id,
+        jti: refreshTokenPayload.jti,
+        sessionId: refreshTokenPayload.sessionId,
+        issuedAt,
+        expiresAt,
+        isValid: true,
+      };
+
+      await refreshSessionRepository.createRefreshSession(refreshSessionData);
 
       return {
         status: ResultStatus.Success,
-        data: { accessToken },
+        data: { accessToken, refreshToken },
+        errorsMessages: null,
+      };
+    },
+
+    async refreshTokens(currentRefreshToken: string): Promise<Result<RefreshTokenSuccessViewModel>> {
+      const refreshTokenPayload = await jwtService.verifyRefreshToken(currentRefreshToken);
+      if (!refreshTokenPayload) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      const issuedAt = new Date();
+      const expiresAt = add(issuedAt, { seconds: REFRESH_SESSION_LIFETIME_SECONDS });
+      const currentRefreshSession = await refreshSessionRepository.findRefreshSessionBySessionId(
+        refreshTokenPayload.sessionId,
+      );
+      if (!currentRefreshSession) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.expiresAt < new Date()) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.userId !== refreshTokenPayload.userId) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.isValid !== true) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.jti !== refreshTokenPayload.jti) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      const rotateRefreshSessionData: RotateRefreshSessionData = {
+        jti: crypto.randomUUID(),
+        issuedAt,
+        expiresAt,
+      };
+      const isRefreshSessionRotated = await refreshSessionRepository.rotateRefreshSession(
+        refreshTokenPayload.sessionId,
+        refreshTokenPayload.jti,
+        rotateRefreshSessionData,
+      );
+      if (!isRefreshSessionRotated) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      const newAccessTokenPayload: JwtPayloadType = { userId: refreshTokenPayload.userId };
+      const newRefreshTokenPayload: RefreshTokenPayloadType = {
+        userId: refreshTokenPayload.userId,
+        jti: rotateRefreshSessionData.jti,
+        sessionId: refreshTokenPayload.sessionId,
+        tokenType: "refresh",
+      };
+      const newAccessToken = await jwtService.createAccessToken(newAccessTokenPayload);
+      const newRefreshToken = await jwtService.createRefreshToken(newRefreshTokenPayload);
+
+      return {
+        status: ResultStatus.Success,
+        data: { accessToken: newAccessToken, refreshToken: newRefreshToken },
+        errorsMessages: null,
+      };
+    },
+
+    async logout(currentRefreshToken: string): Promise<Result<null>> {
+      const refreshTokenPayload = await jwtService.verifyRefreshToken(currentRefreshToken);
+      if (!refreshTokenPayload) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      const currentRefreshSession = await refreshSessionRepository.findRefreshSessionBySessionId(
+        refreshTokenPayload.sessionId,
+      );
+      if (!currentRefreshSession) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.expiresAt < new Date()) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.userId !== refreshTokenPayload.userId) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.isValid !== true) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      if (currentRefreshSession.jti !== refreshTokenPayload.jti) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      const isRefreshSessionInvalidated =
+        await refreshSessionRepository.invalidateRefreshSessionBySessionId(
+          refreshTokenPayload.sessionId,
+        );
+      if (!isRefreshSessionInvalidated) {
+        return {
+          status: ResultStatus.Unauthorized,
+          data: null,
+          errorsMessages: null,
+        };
+      }
+      return {
+        status: ResultStatus.Success,
+        data: null,
         errorsMessages: null,
       };
     },
@@ -115,11 +292,11 @@ export const createAuthService = (
         };
       }
 
-      // return {
-      //   status: ResultStatus.Success,
-      //   data: null,
-      //   errorsMessages: null,
-      // };
+      return {
+        status: ResultStatus.Success,
+        data: null,
+        errorsMessages: null,
+      };
     },
 
     async confirmRegistration(dto: RegistrationConfirmationInputDto): Promise<Result<null>> {

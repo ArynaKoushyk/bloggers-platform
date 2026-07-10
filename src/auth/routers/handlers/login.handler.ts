@@ -5,6 +5,7 @@ import { ResultStatus } from "../../../core/result/resultCode";
 import { LoginInputDto } from "../../dto/login.input.dto";
 import { authService } from "../../composition/auth.container";
 import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
+import { SETTINGS } from "../../../core/settings/settings";
 
 export async function loginHandler(req: RequestWithBody<LoginInputDto>, res: Response) {
   const loginDto = req.body;
@@ -19,7 +20,12 @@ export async function loginHandler(req: RequestWithBody<LoginInputDto>, res: Res
     });
   }
 
-  return res.status(HttpStatus.Ok).send(loginResult.data);
+  res.cookie("refreshToken", loginResult.data.refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: SETTINGS.REFRESH_TOKEN_COOKIE_MAX_AGE,
+  });
+
+  return res.status(HttpStatus.Ok).send({ accessToken: loginResult.data.accessToken });
 }
-
-

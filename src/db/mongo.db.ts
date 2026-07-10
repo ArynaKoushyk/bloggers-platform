@@ -4,17 +4,20 @@ import { BlogDbModel } from "../blogs/types/blog-db.model";
 import { PostDbModel } from "../posts/types/post-db.model";
 import { UserDbModel } from "../users/types/user-db.model";
 import { CommentDbModel } from "../comments/types/comment-db.model";
+import { RefreshSessionDbModel } from "../auth/types/refresh-session/refresh-session-db.model";
 
 const BLOG_COLLECTION_NAME = "blogs";
 const POST_COLLECTION_NAME = "posts";
 const USER_COLLECTION_NAME = "users";
 const COMMENT_COLLECTION_NAME = "comments";
+const REFRESH_SESSIONS_COLLECTION_NAME = "refreshSessions";
 
 export let client: MongoClient;
 export let blogCollection: Collection<BlogDbModel>;
 export let postCollection: Collection<PostDbModel>;
 export let userCollection: Collection<UserDbModel>;
 export let commentCollection: Collection<CommentDbModel>;
+export let refreshSessionsCollection: Collection<RefreshSessionDbModel>;
 
 export async function runDb(url: string): Promise<void> {
   client = new MongoClient(url);
@@ -24,6 +27,7 @@ export async function runDb(url: string): Promise<void> {
   postCollection = db.collection<PostDbModel>(POST_COLLECTION_NAME);
   userCollection = db.collection<UserDbModel>(USER_COLLECTION_NAME);
   commentCollection = db.collection<CommentDbModel>(COMMENT_COLLECTION_NAME);
+  refreshSessionsCollection = db.collection<RefreshSessionDbModel>(REFRESH_SESSIONS_COLLECTION_NAME);
   try {
     await client.connect();
     await db.command({ ping: 1 });

@@ -1,4 +1,4 @@
-export type LoginSuccessViewModel = {
+export type RefreshTokenSuccessViewModel = {
   accessToken: string;
   refreshToken: string;
 };

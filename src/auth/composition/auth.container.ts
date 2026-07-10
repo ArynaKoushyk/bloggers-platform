@@ -3,10 +3,12 @@ import { bcryptPasswordHashAdapter } from "../adapters/bcrypt-password-hash.adap
 import { jwtAdapter } from "../adapters/jwt.adapter";
 import { nodemailerAdapter } from "../adapters/nodemailer.adapter";
 import { createAuthService } from "../applications/auth.service";
+import { mongoRefreshSessionRepository } from "../repositories/mongo-refresh-session.repository";
 
 export const authService = createAuthService(
   mongoUsersRepository,
   bcryptPasswordHashAdapter,
   jwtAdapter,
-  nodemailerAdapter
+  nodemailerAdapter,
+  mongoRefreshSessionRepository,
 );
