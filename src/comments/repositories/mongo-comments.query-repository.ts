@@ -2,8 +2,9 @@ import { ObjectId, WithId } from "mongodb";
 import { CommentQueryInput } from "../types/comment-query.input";
 import { CommentDbModel } from "../types/comment-db.model";
 import { commentCollection } from "../../db/mongo.db";
+import { ICommentsQueryRepository } from "../interfaces/comments.query.repository-interface";
 
-export const commentsQueryRepository = {
+export class MongoCommentsQueryRepository implements ICommentsQueryRepository {
   async findCommentsByPostId(
     postId: string,
     query: CommentQueryInput,
@@ -22,9 +23,9 @@ export const commentsQueryRepository = {
 
     const totalCount = await commentCollection.countDocuments(filter);
     return { items, totalCount };
-  },
+  }
 
   async findCommentById(id: string): Promise<WithId<CommentDbModel> | null> {
     return commentCollection.findOne({ _id: new ObjectId(id) });
-  },
-};
+  }
+}

@@ -2,19 +2,13 @@ import { ObjectId, WithId } from "mongodb";
 import { UserDbModel } from "../types/user-db.model";
 import { UserQueryInput } from "../types/user-query.input";
 import { userCollection } from "../../db/mongo.db";
+import { IUsersQueryRepository } from "../applications/interfaces/users.repository.query-interface";
 
-export const usersQueryRepository = {
+export class MongoUsersQueryRepository implements IUsersQueryRepository {
   async findAllUsers(
     query: UserQueryInput,
   ): Promise<{ items: WithId<UserDbModel>[]; totalCount: number }> {
-    const {
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-      searchEmailTerm,
-      searchLoginTerm,
-    } = query;
+    const { pageNumber, pageSize, sortBy, sortDirection, searchEmailTerm, searchLoginTerm } = query;
     const skip = (pageNumber - 1) * pageSize;
     const limit = pageSize;
     const filter: any = {};
@@ -41,9 +35,9 @@ export const usersQueryRepository = {
 
     const totalCount = await userCollection.countDocuments(filter);
     return { items, totalCount };
-  },
+  }
 
   async findUserById(id: string): Promise<WithId<UserDbModel> | null> {
     return userCollection.findOne({ _id: new ObjectId(id) });
-  },
-};
+  }
+}

@@ -1,12 +1,13 @@
-import { blogsQueryRepository } from "../repositories/mongo-blogs.query-repository";
 import { ResultStatus } from "../../core/result/resultCode";
 import { mapToBlogViewModel } from "../mappers/map-to-blog-view-model.util";
 import { Result } from "../../core/result/result.type";
 import { BlogViewModel } from "../types/blog-view-model";
+import { IBlogsQueryRepository } from "../interfaces/blogs.query.repository-interface";
 
-export const getBlogQueryHandler = {
+export class GetBlogQueryHandler {
+  constructor(private blogsQueryRepository: IBlogsQueryRepository) {}
   async findBlogById(id: string): Promise<Result<BlogViewModel>> {
-    const blog = await blogsQueryRepository.findBlogById(id);
+    const blog = await this.blogsQueryRepository.findBlogById(id);
 
     if (!blog) {
       return {
@@ -21,5 +22,5 @@ export const getBlogQueryHandler = {
       data: mapToBlogViewModel(blog),
       errorsMessages: null,
     };
-  },
-};
+  }
+}

@@ -1,12 +1,13 @@
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
+import { IUsersQueryRepository } from "../applications/interfaces/users.repository.query-interface";
 import { mapToUserViewModel } from "../mappers/map-to-user-view-model.util";
-import { usersQueryRepository } from "../repositories/mongo-users.query-repository";
 import { UserViewModel } from "../types/user-view-model";
 
-export const getUserQueryHandler = {
+export class GetUserQueryHandler {
+  constructor(private usersQueryRepository: IUsersQueryRepository) {}
   async findUserById(id: string): Promise<Result<UserViewModel>> {
-    const user = await usersQueryRepository.findUserById(id);
+    const user = await this.usersQueryRepository.findUserById(id);
 
     if (!user) {
       return {
@@ -21,5 +22,7 @@ export const getUserQueryHandler = {
       data: mapToUserViewModel(user),
       errorsMessages: null,
     };
-  },
-};
+  }
+}
+
+

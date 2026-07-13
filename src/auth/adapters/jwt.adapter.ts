@@ -1,17 +1,16 @@
 import { SETTINGS } from "../../core/settings/settings";
-import { JwtService } from "../applications/types/jwt.service.type";
 import { JwtPayloadType } from "../types/jwt-payload.type";
 import jwt from "jsonwebtoken";
 import { RefreshTokenPayloadType } from "../types/refresh-session/refresh-token-payload.type";
 
-//!! использовать разные секреты для access и refresh
-export const jwtAdapter: JwtService = {
+//!! использовать разные секреты для access и refresh, нужны ли все эти прoвeрки payload
+export class JwtAdapter {
   async createAccessToken(payload: JwtPayloadType): Promise<string> {
     return jwt.sign(payload, SETTINGS.ACCESS_TOKEN_SECRET, {
       expiresIn: SETTINGS.JWT_ACCESS_TOKEN_EXPIRES_IN,
       algorithm: "HS256",
     });
-  },
+  }
   async verifyAccessToken(token: string): Promise<JwtPayloadType | null> {
     try {
       const payload = jwt.verify(token, SETTINGS.ACCESS_TOKEN_SECRET, { algorithms: ["HS256"] });
@@ -26,14 +25,14 @@ export const jwtAdapter: JwtService = {
     } catch (error) {
       return null;
     }
-  },
+  }
 
   async createRefreshToken(payload: RefreshTokenPayloadType): Promise<string> {
     return jwt.sign(payload, SETTINGS.REFRESH_TOKEN_SECRET, {
       expiresIn: SETTINGS.JWT_REFRESH_TOKEN_EXPIRES_IN,
       algorithm: "HS256",
     });
-  },
+  }
   async verifyRefreshToken(token: string): Promise<RefreshTokenPayloadType | null> {
     try {
       const payload = jwt.verify(token, SETTINGS.REFRESH_TOKEN_SECRET, { algorithms: ["HS256"] });
@@ -58,5 +57,7 @@ export const jwtAdapter: JwtService = {
     } catch (error) {
       return null;
     }
-  },
-};
+  }
+}
+
+export const jwtAdapter = new JwtAdapter();

@@ -1,20 +1,22 @@
-import { blogsQueryRepository } from "../../blogs/repositories/mongo-blogs.query-repository";
-import { mongoBlogsRepository } from "../../blogs/repositories/mongo-blogs.repository";
+import { IBlogsRepository } from "../../blogs/interfaces/blogs.repository-interface";
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { PaginatedViewModel } from "../../core/types/paginated-view.model";
+import { IPostsQueryRepository } from "../interfaces/posts.query.repository-interface";
 import { mapToPaginatedPostViewModel } from "../mappers/map-to-paginated-post-model.util";
-import { postsQueryRepository } from "../repositories/mongo-posts.query-repository";
 import { PostQueryInput } from "../types/post-query.input";
 import { PostViewModel } from "../types/post-view-model";
-
-export const getPostsByBlogIdQueryHandler = {
+export class GetPostsByBlogIdQueryHandler {
+  constructor(
+    private postsQueryRepository: IPostsQueryRepository,
+    private blogsRepository: IBlogsRepository,
+  ) {}
   async findPostsByBlogId(
     blogId: string,
     query: PostQueryInput,
   ): Promise<Result<PaginatedViewModel<PostViewModel>>> {
     //!!брать лучше из квери репозитория или из комманд репо
-    const blog = await mongoBlogsRepository.findBlogById(blogId);
+    const blog = await this.blogsRepository.findBlogById(blogId);
     if (!blog) {
       return {
         status: ResultStatus.NotFound,
@@ -22,7 +24,7 @@ export const getPostsByBlogIdQueryHandler = {
         errorsMessages: null,
       };
     }
-    const { items, totalCount } = await postsQueryRepository.findPostsByBlogId(blog.id, query);
+    const { items, totalCount } = await this.postsQueryRepository.findPostsByBlogId(blog.id, query);
 
     return {
       status: ResultStatus.Success,
@@ -35,5 +37,5 @@ export const getPostsByBlogIdQueryHandler = {
       }),
       errorsMessages: null,
     };
-  },
-};
+  }
+}

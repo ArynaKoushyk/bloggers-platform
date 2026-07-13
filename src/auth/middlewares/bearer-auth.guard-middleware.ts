@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { jwtAdapter } from "../adapters/jwt.adapter";
 import { HttpStatus } from "../../core/types/http-statuses";
+import { jwtAdapter } from "../adapters/jwt.adapter";
 import { mongoUsersRepository } from "../../users/repositories/mongo-users.repository";
 
+//!! мидлвар надо перписывать на классы
 export const bearerAuthGuardMiddleware = async (
   req: Request,
   res: Response,

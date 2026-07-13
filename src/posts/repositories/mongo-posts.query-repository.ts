@@ -2,8 +2,10 @@ import { ObjectId, WithId } from "mongodb";
 import { postCollection } from "../../db/mongo.db";
 import { PostQueryInput } from "../types/post-query.input";
 import { PostDbModel } from "../types/post-db.model";
+import { IBlogsQueryRepository } from "../../blogs/interfaces/blogs.query.repository-interface";
+import { IPostsQueryRepository } from "../interfaces/posts.query.repository-interface";
 
-export const postsQueryRepository = {
+export class MongoPostsQueryRepository implements IPostsQueryRepository {
   async findAllPosts(
     query: PostQueryInput,
   ): Promise<{ items: WithId<PostDbModel>[]; totalCount: number }> {
@@ -19,15 +21,13 @@ export const postsQueryRepository = {
       .limit(limit)
       .toArray();
 
-      
-
     const totalCount = await postCollection.countDocuments(filter);
     return { items, totalCount };
-  },
+  }
 
   async findPostById(id: string): Promise<WithId<PostDbModel> | null> {
     return postCollection.findOne({ _id: new ObjectId(id) });
-  },
+  }
 
   async findPostsByBlogId(
     blogId: string,
@@ -47,5 +47,5 @@ export const postsQueryRepository = {
 
     const totalCount = await postCollection.countDocuments(filter);
     return { items, totalCount };
-  },
-};
+  }
+}

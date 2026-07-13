@@ -1,33 +1,37 @@
 import { Router } from "express";
 import { superAdminGuardMiddleware } from "../../auth/middlewares/super-admin.guard-middleware";
-import { getPostHandler } from "./handlers/get-post.handler";
-import { getPostListHandler } from "./handlers/get-post-list.handler";
-import { createPostHandler } from "./handlers/create-post.handler";
-import { updatePostHandler } from "./handlers/update-post.handler";
 import { createPostInputValidation } from "../validation/create-post.input.validation";
-import { deletePostHandler } from "./handlers/delete-post.handler";
 import { idParamValidation } from "../../core/validation/id-param.validation";
 import { inputValidationResultMiddleware } from "../../core/validation/input-validation-result.middleware";
 import { postQueryValidation } from "../validation/post-query.validation";
 import { updatePostInputValidation } from "../validation/update-post.input.validation";
-import { getCommentsByPostIdListHandler } from "../../comments/routers/handlers/get-comments-by-post-id.handler";
-import { createCommentByPostIdHandler } from "../../comments/routers/handlers/create-comment-by-post-id.handler";
 import { bearerAuthGuardMiddleware } from "../../auth/middlewares/bearer-auth.guard-middleware";
 import { commentQueryValidation } from "../../comments/validation/comment-query.validation";
 import { createCommentInputValidation } from "../../comments/validation/create-comment.input.validation";
+import { commentsController, postsController } from "../../core/composition/composition-root";
 
 export const postsRouter = Router({});
 
-postsRouter.get("", postQueryValidation, inputValidationResultMiddleware, getPostListHandler);
+postsRouter.get(
+  "",
+  postQueryValidation,
+  inputValidationResultMiddleware,
+  postsController.getPostListHandler.bind(postsController),
+);
 
-postsRouter.get("/:id", idParamValidation("id"), inputValidationResultMiddleware, getPostHandler);
+postsRouter.get(
+  "/:id",
+  idParamValidation("id"),
+  inputValidationResultMiddleware,
+  postsController.getPostHandler.bind(postsController),
+);
 
 postsRouter.post(
   "",
   superAdminGuardMiddleware,
   createPostInputValidation,
   inputValidationResultMiddleware,
-  createPostHandler,
+  postsController.createPostHandler.bind(postsController),
 );
 
 postsRouter.put(
@@ -36,7 +40,7 @@ postsRouter.put(
   idParamValidation("id"),
   updatePostInputValidation,
   inputValidationResultMiddleware,
-  updatePostHandler,
+  postsController.updatePostHandler.bind(postQueryValidation),
 );
 
 postsRouter.delete(
@@ -44,7 +48,7 @@ postsRouter.delete(
   superAdminGuardMiddleware,
   idParamValidation("id"),
   inputValidationResultMiddleware,
-  deletePostHandler,
+  postsController.deletePostHandler.bind(postQueryValidation),
 );
 
 postsRouter.get(
@@ -52,7 +56,7 @@ postsRouter.get(
   idParamValidation("postId"),
   commentQueryValidation,
   inputValidationResultMiddleware,
-  getCommentsByPostIdListHandler,
+  commentsController.getCommentsByPostIdListHandler.bind(commentsController),
 );
 
 postsRouter.post(
@@ -61,5 +65,5 @@ postsRouter.post(
   idParamValidation("postId"),
   createCommentInputValidation,
   inputValidationResultMiddleware,
-  createCommentByPostIdHandler,
+  commentsController.createCommentByPostIdHandler.bind(commentsController),
 );

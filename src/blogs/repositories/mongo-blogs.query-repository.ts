@@ -2,8 +2,9 @@ import { ObjectId, WithId } from "mongodb";
 import { BlogQueryInput } from "../types/blog-query.input";
 import { blogCollection } from "../../db/mongo.db";
 import { BlogDbModel } from "../types/blog-db.model";
+import { IBlogsQueryRepository } from "../interfaces/blogs.query.repository-interface";
 
-export const blogsQueryRepository = {
+export class MongoBlogsQueryRepository implements IBlogsQueryRepository {
   async findAllBlogs(
     query: BlogQueryInput,
   ): Promise<{ items: WithId<BlogDbModel>[]; totalCount: number }> {
@@ -23,9 +24,9 @@ export const blogsQueryRepository = {
 
     const totalCount = await blogCollection.countDocuments(filter);
     return { items, totalCount };
-  },
+  }
 
   async findBlogById(id: string): Promise<WithId<BlogDbModel> | null> {
     return blogCollection.findOne({ _id: new ObjectId(id) });
-  },
-};
+  }
+}

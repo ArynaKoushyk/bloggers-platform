@@ -1,19 +1,23 @@
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { PaginatedViewModel } from "../../core/types/paginated-view.model";
-import { postsService } from "../../posts/composition/posts.container";
-import { mongoPostsRepository } from "../../posts/repositories/mongo-posts.repository";
+import { IPostsRepository } from "../../posts/interfaces/posts.repository-interface";
+import { ICommentsQueryRepository } from "../interfaces/comments.query.repository-interface";
 import { mapToPaginatedCommentViewModel } from "../mappers/map-to-paginated-comment-model.util";
-import { commentsQueryRepository } from "../repositories/mongo-comments.query-repository";
 import { CommentQueryInput } from "../types/comment-query.input";
 import { CommentViewModel } from "../types/comment-view-model";
 
-export const getCommentsByPostIdQueryHandler = {
+export class GetCommentsByPostIdQueryHandler {
+
+  constructor(
+    private commentsQueryRepository: ICommentsQueryRepository,
+    private postsRepository: IPostsRepository,
+  ) {}
   async findCommentsByPostId(
     postId: string,
     query: CommentQueryInput,
   ): Promise<Result<PaginatedViewModel<CommentViewModel>>> {
-    const post = await mongoPostsRepository.findPostById(postId);
+    const post = await this.postsRepository.findPostById(postId);
     if (!post) {
       return {
         status: ResultStatus.NotFound,
@@ -22,7 +26,7 @@ export const getCommentsByPostIdQueryHandler = {
       };
     }
 
-    const { items, totalCount } = await commentsQueryRepository.findCommentsByPostId(
+    const { items, totalCount } = await this.commentsQueryRepository.findCommentsByPostId(
       post.id,
       query,
     );
@@ -40,5 +44,7 @@ export const getCommentsByPostIdQueryHandler = {
       data: paginatedComments,
       errorsMessages: null,
     };
-  },
-};
+  }
+}
+
+

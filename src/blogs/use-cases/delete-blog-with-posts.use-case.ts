@@ -1,14 +1,16 @@
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
-import { PostsService } from "../../posts/applications/types/posts.service.type";
-import { BlogsService } from "../applications/types/blogs.service.type";
+import { IPostsService } from "../../posts/interfaces/posts.service-interface";
+import { IBlogsService } from "../interfaces/blogs.service-interface";
 
-export const createDeleteBlogWithPostsUseCase = (
-  blogsService: BlogsService,
-  postsService: PostsService,
-) => ({
+export class DeleteBlogWithPostsUseCase {
+  constructor(
+    private blogsService: IBlogsService,
+    private postsService: IPostsService,
+  ) {}
+
   async execute(blogId: string): Promise<Result<null>> {
-    const deleteResult = await blogsService.deleteBlog(blogId);
+    const deleteResult = await this.blogsService.deleteBlog(blogId);
     if (deleteResult.status !== ResultStatus.Success) {
       return {
         status: deleteResult.status,
@@ -17,11 +19,11 @@ export const createDeleteBlogWithPostsUseCase = (
       };
     }
 
-    await postsService.deletePostsByBlogId(blogId);
+    await this.postsService.deletePostsByBlogId(blogId);
     return {
       status: ResultStatus.Success,
       data: null,
       errorsMessages: null,
     };
-  },
-});
+  }
+}

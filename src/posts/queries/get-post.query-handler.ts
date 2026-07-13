@@ -1,12 +1,13 @@
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
+import { IPostsQueryRepository } from "../interfaces/posts.query.repository-interface";
 import { mapToPostViewModel } from "../mappers/map-to-post-view-model.util";
-import { postsQueryRepository } from "../repositories/mongo-posts.query-repository";
 import { PostViewModel } from "../types/post-view-model";
 
-export const getPostQueryHandler = {
+export class GetPostQueryHandler {
+  constructor(private postsQueryRepository: IPostsQueryRepository) {}
   async findPostById(id: string): Promise<Result<PostViewModel>> {
-    const post = await postsQueryRepository.findPostById(id);
+    const post = await this.postsQueryRepository.findPostById(id);
 
     if (!post) {
       return {
@@ -21,5 +22,6 @@ export const getPostQueryHandler = {
       data: mapToPostViewModel(post),
       errorsMessages: null,
     };
-  },
-};
+  }
+}
+

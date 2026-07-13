@@ -1,5 +1,7 @@
 import { SignOptions } from "jsonwebtoken";
 
+const REFRESH_TOKEN_COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+
 //!! спросить про dotenv
 export const SETTINGS = {
   PORT: process.env.PORT || 5001,
@@ -9,7 +11,19 @@ export const SETTINGS = {
   REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || "secret",
   JWT_ACCESS_TOKEN_EXPIRES_IN: "10s" as SignOptions["expiresIn"],
   JWT_REFRESH_TOKEN_EXPIRES_IN: "20s" as SignOptions["expiresIn"],
-  REFRESH_TOKEN_COOKIE_MAX_AGE:30 * 24 * 60 * 60 * 1000,
+  REFRESH_TOKEN_COOKIE_NAME: "refreshToken",
+  REFRESH_TOKEN_COOKIE_MAX_AGE,
+  REFRESH_TOKEN_COOKIE_OPTIONS: {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict" as const,
+    maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
+  },
+  REFRESH_TOKEN_CLEAR_COOKIE_OPTIONS: {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict" as const,
+  },
   GMAIL_USER: process.env.GMAIL_USER || "aryna.koushyk@gmail.com",
   GMAIL_APP_PASSWORD: process.env.GMAIL_APP_PASSWORD || "falkhvetpfpmtwoc",
   FRONTEND_URL: process.env.FRONTEND_URL || "https://somesite.com",

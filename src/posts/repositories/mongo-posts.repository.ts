@@ -4,21 +4,21 @@ import { PostEntity } from "../types/domain/post-entity.model";
 import { mapPostDbToEntity } from "../mappers/map-post.db-to-entity.model";
 import { CreatePostData } from "../types/data/create-post.data";
 import { UpdatePostData } from "../types/data/update-post.data";
-import { PostsRepository } from "../applications/types/posts.repository.type";
+import { IPostsRepository } from "../interfaces/posts.repository-interface";
 
-export const mongoPostsRepository: PostsRepository = {
+export class MongoPostsRepository implements IPostsRepository {
   async findPostById(id: string): Promise<PostEntity | null> {
     const document = await postCollection.findOne({ _id: new ObjectId(id) });
     if (!document) {
       return null;
     }
     return mapPostDbToEntity(document);
-  },
+  }
 
   async createPost(data: CreatePostData): Promise<string> {
     const insertResult = await postCollection.insertOne(data);
     return insertResult.insertedId.toString();
-  },
+  }
 
   async updatePost(id: string, data: UpdatePostData): Promise<boolean> {
     const { title, shortDescription, content, blogId, blogName } = data;
@@ -37,7 +37,7 @@ export const mongoPostsRepository: PostsRepository = {
       },
     );
     return updateResult.matchedCount === 1;
-  },
+  }
 
   //!!выбрасывать ли ошибки в репо
   async deletePost(id: string): Promise<boolean> {
@@ -45,10 +45,10 @@ export const mongoPostsRepository: PostsRepository = {
       _id: new ObjectId(id),
     });
     return deleteResult.deletedCount === 1;
-  },
+  }
 
   async deletePostsByBlogId(blogId: string): Promise<void> {
     await postCollection.deleteMany({ blogId });
     return;
-  },
-};
+  }
+}

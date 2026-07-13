@@ -1,12 +1,10 @@
 import { Router } from "express";
-import { getUserListHandler } from "./handlers/get-user-list.handler";
 import { superAdminGuardMiddleware } from "../../auth/middlewares/super-admin.guard-middleware";
 import { userQueryValidation } from "../validation/user-query.validation";
 import { inputValidationResultMiddleware } from "../../core/validation/input-validation-result.middleware";
-import { createUserHandler } from "./handlers/create-user.handler";
-import { deleteUserHandler } from "./handlers/delete-user.handler";
 import { createUserInputValidation } from "../validation/create-user.input.validation";
 import { idParamValidation } from "../../core/validation/id-param.validation";
+import { usersController } from "../../core/composition/composition-root";
 
 export const usersRouter = Router({});
 
@@ -15,19 +13,19 @@ usersRouter.get(
   superAdminGuardMiddleware,
   userQueryValidation,
   inputValidationResultMiddleware,
-  getUserListHandler,
+  usersController.getUserListHandler.bind(usersController),
 );
 usersRouter.post(
   "",
   superAdminGuardMiddleware,
   createUserInputValidation,
   inputValidationResultMiddleware,
-  createUserHandler,
+  usersController.createUserHandler.bind(usersController),
 );
 usersRouter.delete(
   "/:id",
   superAdminGuardMiddleware,
-  idParamValidation('id'),
+  idParamValidation("id"),
   inputValidationResultMiddleware,
-  deleteUserHandler,
+  usersController.deleteUserHandler.bind(usersController),
 );
