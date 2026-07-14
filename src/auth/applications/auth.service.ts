@@ -12,7 +12,7 @@ import { IJwtService } from "../interfaces/jwt.service-interface";
 import { IEmailService } from "../interfaces/email.service-interface";
 import { IRefreshSessionRepository } from "../interfaces/refresh-session.repository-interface";
 import { RefreshTokenSuccessViewModel } from "../types/refresh-session/refresh-token-success-view-model";
-import { RotateRefreshSessionData } from "../types/refresh-session/data/rotate-refresh-session.data";
+import { RotateRefreshTokenData } from "../types/refresh-session/data/rotate-refresh-token.data";
 import { JwtPayloadType } from "../types/jwt-payload.type";
 import { RegistrationInputDto } from "../dto/registration.input.dto";
 import { CreateUserData } from "../../users/types/data/create-user.data";
@@ -21,6 +21,7 @@ import { RegistrationConfirmationInputDto } from "../dto/registration-confirmati
 import { RegistrationEmailResendingInputDto } from "../dto/registration-email-resending.input.dto";
 import { MongoRefreshSessionRepository } from "../repositories/mongo-refresh-session.repository";
 import { IAuthService } from "../interfaces/auth.service-interface";
+import { randomUUID } from "node:crypto";
 
 //!! поговорить про black и white list
 const REFRESH_SESSION_LIFETIME_SECONDS = 20;
@@ -74,11 +75,13 @@ export class AuthService implements IAuthService {
     const expiresAt = add(issuedAt, { seconds: REFRESH_SESSION_LIFETIME_SECONDS });
     const refreshSessionData: CreateRefreshSessionData = {
       userId: user.id,
-      jti: refreshTokenPayload.jti,
       sessionId: refreshTokenPayload.sessionId,
-      issuedAt,
-      expiresAt,
-      isValid: true,
+      isActive: true,
+      refreshToken: {
+        id: refreshTokenPayload.jti,
+        issuedAt,
+        expiresAt,
+      },
     };
 
     await this.refreshSessionRepository.createRefreshSession(refreshSessionData);
@@ -96,17 +99,19 @@ export class AuthService implements IAuthService {
     const issuedAt = new Date();
     const expiresAt = add(issuedAt, { seconds: REFRESH_SESSION_LIFETIME_SECONDS });
 
-    const rotateRefreshSessionData: RotateRefreshSessionData = {
-      jti: crypto.randomUUID(),
-      issuedAt,
-      expiresAt,
+    const rotateRefreshTokenData: RotateRefreshTokenData = {
+      refreshToken: {
+        id: randomUUID(),
+        issuedAt,
+        expiresAt,
+      },
     };
-    const isRefreshSessionRotated = await this.refreshSessionRepository.rotateRefreshSession(
+    const isRefreshTokenRotated = await this.refreshSessionRepository.rotateRefreshTokenInSession(
       payload.sessionId,
       payload.jti,
-      rotateRefreshSessionData,
+      rotateRefreshTokenData,
     );
-    if (!isRefreshSessionRotated) {
+    if (!isRefreshTokenRotated) {
       return {
         status: ResultStatus.Unauthorized,
         data: null,
@@ -116,7 +121,7 @@ export class AuthService implements IAuthService {
     const newAccessTokenPayload: JwtPayloadType = { userId: payload.userId };
     const newRefreshTokenPayload: RefreshTokenPayloadType = {
       userId: payload.userId,
-      jti: rotateRefreshSessionData.jti,
+      jti: rotateRefreshTokenData.refreshToken.id,
       sessionId: payload.sessionId,
       tokenType: "refresh",
     };

@@ -1,16 +1,16 @@
 import { CreateRefreshSessionData } from "../types/refresh-session/data/create-refresh-session.data";
-import { RotateRefreshSessionData } from "../types/refresh-session/data/rotate-refresh-session.data";
+import { RotateRefreshTokenData } from "../types/refresh-session/data/rotate-refresh-token.data";
 import { RefreshSessionEntity } from "../types/refresh-session/domain/refresh-session-entity.model";
 export interface IRefreshSessionRepository {
   createRefreshSession(data: CreateRefreshSessionData): Promise<string>;
   findRefreshSessionBySessionId(sessionId: string): Promise<RefreshSessionEntity | null>;
-  findRefreshSessionByJti(jti: string): Promise<RefreshSessionEntity | null>;
-  rotateRefreshSession(
+  findRefreshSessionByRefreshTokenId(refreshTokenId: string): Promise<RefreshSessionEntity | null>;
+  rotateRefreshTokenInSession(
     sessionId: string,
-    currentJti: string,
-    data: RotateRefreshSessionData,
+    currentRefreshTokenId: string,
+    data: RotateRefreshTokenData,
   ): Promise<boolean>;
   invalidateRefreshSessionBySessionId(sessionId: string): Promise<boolean>;
-  invalidateRefreshSessionByJti(jti: string): Promise<boolean>;
+  invalidateRefreshSessionByRefreshTokenId(refreshTokenId: string): Promise<boolean>;
   invalidateRefreshSessionsByUserId(userId: string): Promise<boolean>;
 }

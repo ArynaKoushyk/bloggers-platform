@@ -2,9 +2,10 @@ import { SETTINGS } from "../../core/settings/settings";
 import { JwtPayloadType } from "../types/jwt-payload.type";
 import jwt from "jsonwebtoken";
 import { RefreshTokenPayloadType } from "../types/refresh-session/refresh-token-payload.type";
+import { IJwtService } from "../interfaces/jwt.service-interface";
 
 //!! использовать разные секреты для access и refresh, нужны ли все эти прoвeрки payload
-export class JwtAdapter {
+export class JwtAdapter implements IJwtService {
   async createAccessToken(payload: JwtPayloadType): Promise<string> {
     return jwt.sign(payload, SETTINGS.ACCESS_TOKEN_SECRET, {
       expiresIn: SETTINGS.JWT_ACCESS_TOKEN_EXPIRES_IN,
@@ -22,7 +23,8 @@ export class JwtAdapter {
       return {
         userId: payload.userId,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error("Wrong access token", error);
       return null;
     }
   }
@@ -54,10 +56,17 @@ export class JwtAdapter {
         jti: payload.jti,
         tokenType: "refresh",
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error("Wrong refresh token", error);
+      return null;
+    }
+  }
+  async decodeToken(token: string): Promise<any> {
+    try {
+      return jwt.decode(token);
+    } catch (error: unknown) {
+      console.error("Can't decode token", error);
       return null;
     }
   }
 }
-
-export const jwtAdapter = new JwtAdapter();

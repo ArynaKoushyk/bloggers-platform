@@ -1,8 +1,10 @@
 export type RefreshSessionDbModel = {
   userId: string;
-  jti: string;
   sessionId: string;
-  issuedAt: Date;
-  expiresAt: Date;
-  isValid: boolean;
+  isActive: boolean;
+  refreshToken: {
+    id: string;
+    issuedAt: Date;
+    expiresAt: Date;
+  };
 };

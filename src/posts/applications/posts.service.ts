@@ -6,9 +6,7 @@ import { UpdatePostInputDto } from "../dto/update-post.input.dto";
 import { CreatePostData } from "../types/data/create-post.data";
 import { UpdatePostData } from "../types/data/update-post.data";
 import { CreatePostByBlogIdInputDto } from "../dto/create-post-by-blog-id.input.dto";
-import { MongoPostsRepository } from "../repositories/mongo-posts.repository";
 import { IBlogsRepository } from "../../blogs/interfaces/blogs.repository-interface";
-import { MongoBlogsRepository } from "../../blogs/repositories/mongo-blogs.repository";
 import { IPostsService } from "../interfaces/posts.service-interface";
 import { IPostsRepository } from "../interfaces/posts.repository-interface";
 

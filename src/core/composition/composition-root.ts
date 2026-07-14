@@ -85,7 +85,7 @@ export const usersController = new UsersController(
   getUsersListQueryHandler,
 );
 
-const jwtService = new JwtAdapter();
+export const jwtService = new JwtAdapter();
 const emailService = new NodemailerAdapter();
 const refreshSessionRepository = new MongoRefreshSessionRepository();
 const authService = new AuthService(

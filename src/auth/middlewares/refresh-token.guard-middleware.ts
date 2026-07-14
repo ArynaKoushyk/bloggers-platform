@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/http-statuses";
-import { jwtAdapter } from "../adapters/jwt.adapter";
 import { mongoRefreshSessionRepository } from "../repositories/mongo-refresh-session.repository";
 import { SETTINGS } from "../../core/settings/settings";
+import { jwtService } from "../../core/composition/composition-root";
+
 
 export const refreshTokenGuardMiddleware = async (
   req: Request,
@@ -14,7 +15,7 @@ export const refreshTokenGuardMiddleware = async (
     return res.sendStatus(HttpStatus.Unauthorized);
   }
 
-  const payload = await jwtAdapter.verifyRefreshToken(refreshToken);
+  const payload = await jwtService.verifyRefreshToken(refreshToken);
   if (!payload) {
     return res.sendStatus(HttpStatus.Unauthorized);
   }
@@ -25,16 +26,16 @@ export const refreshTokenGuardMiddleware = async (
   if (!currentRefreshSession) {
     return res.sendStatus(HttpStatus.Unauthorized);
   }
-  if (currentRefreshSession.expiresAt < new Date()) {
+  if (currentRefreshSession.refreshToken.expiresAt < new Date()) {
     return res.sendStatus(HttpStatus.Unauthorized);
   }
   if (currentRefreshSession.userId !== payload.userId) {
     return res.sendStatus(HttpStatus.Unauthorized);
   }
-  if (currentRefreshSession.isValid !== true) {
+  if (currentRefreshSession.isActive !== true) {
     return res.sendStatus(HttpStatus.Unauthorized);
   }
-  if (currentRefreshSession.jti !== payload.jti) {
+  if (currentRefreshSession.refreshToken.id !== payload.jti) {
     return res.sendStatus(HttpStatus.Unauthorized);
   }
 

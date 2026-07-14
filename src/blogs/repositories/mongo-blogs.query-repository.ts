@@ -4,6 +4,11 @@ import { blogCollection } from "../../db/mongo.db";
 import { BlogDbModel } from "../types/blog-db.model";
 import { IBlogsQueryRepository } from "../interfaces/blogs.query.repository-interface";
 
+
+
+
+//!! лучше через интерфейсы или абсрактные классы
+
 export class MongoBlogsQueryRepository implements IBlogsQueryRepository {
   async findAllBlogs(
     query: BlogQueryInput,

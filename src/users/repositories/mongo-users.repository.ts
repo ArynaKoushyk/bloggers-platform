@@ -86,5 +86,3 @@ export class MongoUsersRepository {
     return updateResult.modifiedCount === 1;
   }
 }
-
-export const mongoUsersRepository = new MongoUsersRepository();

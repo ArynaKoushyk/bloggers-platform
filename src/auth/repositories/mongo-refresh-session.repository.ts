@@ -2,9 +2,10 @@ import { refreshSessionsCollection } from "../../db/mongo.db";
 import { CreateRefreshSessionData } from "../types/refresh-session/data/create-refresh-session.data";
 import { RefreshSessionEntity } from "../types/refresh-session/domain/refresh-session-entity.model";
 import { mapRefreshSessionDbToEntity } from "../mappers/map-refresh-session.db-to-entity.model";
-import { RotateRefreshSessionData } from "../types/refresh-session/data/rotate-refresh-session.data";
+import { RotateRefreshTokenData } from "../types/refresh-session/data/rotate-refresh-token.data";
 import { IRefreshSessionRepository } from "../interfaces/refresh-session.repository-interface";
 export class MongoRefreshSessionRepository implements IRefreshSessionRepository {
+  
   async findRefreshSessionBySessionId(sessionId: string): Promise<RefreshSessionEntity | null> {
     const document = await refreshSessionsCollection.findOne({ sessionId: sessionId });
     if (!document) {
@@ -13,8 +14,10 @@ export class MongoRefreshSessionRepository implements IRefreshSessionRepository 
     return mapRefreshSessionDbToEntity(document);
   }
 
-  async findRefreshSessionByJti(jti: string): Promise<RefreshSessionEntity | null> {
-    const document = await refreshSessionsCollection.findOne({ jti: jti });
+  async findRefreshSessionByRefreshTokenId(
+    refreshTokenId: string,
+  ): Promise<RefreshSessionEntity | null> {
+    const document = await refreshSessionsCollection.findOne({ "refreshToken.id": refreshTokenId });
     if (!document) {
       return null;
     }
@@ -26,30 +29,30 @@ export class MongoRefreshSessionRepository implements IRefreshSessionRepository 
     return insertResult.insertedId.toString();
   }
 
-  async invalidateRefreshSessionByJti(jti: string): Promise<boolean> {
+  async invalidateRefreshSessionByRefreshTokenId(refreshTokenId: string): Promise<boolean> {
     const updateResult = await refreshSessionsCollection.updateOne(
-      { jti: jti, isValid: true },
+      { "refreshToken.id": refreshTokenId, isActive: true },
       {
         $set: {
-          isValid: false,
+          isActive: false,
         },
       },
     );
     return updateResult.modifiedCount === 1;
   }
 
-  async rotateRefreshSession(
+  async rotateRefreshTokenInSession(
     sessionId: string,
-    currentJti: string,
-    data: RotateRefreshSessionData,
+    currentRefreshTokenId: string,
+    data: RotateRefreshTokenData,
   ): Promise<boolean> {
     const updateResult = await refreshSessionsCollection.updateOne(
-      { sessionId: sessionId, jti: currentJti, isValid: true },
+      { sessionId: sessionId, "refreshToken.id": currentRefreshTokenId, isActive: true },
       {
         $set: {
-          jti: data.jti,
-          issuedAt: data.issuedAt,
-          expiresAt: data.expiresAt,
+          "refreshToken.id": data.refreshToken.id,
+          "refreshToken.issuedAt": data.refreshToken.issuedAt,
+          "refreshToken.expiresAt": data.refreshToken.expiresAt,
         },
       },
     );
@@ -58,10 +61,10 @@ export class MongoRefreshSessionRepository implements IRefreshSessionRepository 
 
   async invalidateRefreshSessionBySessionId(sessionId: string): Promise<boolean> {
     const updateResult = await refreshSessionsCollection.updateOne(
-      { sessionId: sessionId, isValid: true },
+      { sessionId: sessionId, isActive: true },
       {
         $set: {
-          isValid: false,
+          isActive: false,
         },
       },
     );
@@ -70,10 +73,10 @@ export class MongoRefreshSessionRepository implements IRefreshSessionRepository 
 
   async invalidateRefreshSessionsByUserId(userId: string): Promise<boolean> {
     const updateResult = await refreshSessionsCollection.updateMany(
-      { userId: userId, isValid: true },
+      { userId: userId, isActive: true },
       {
         $set: {
-          isValid: false,
+          isActive: false,
         },
       },
     );

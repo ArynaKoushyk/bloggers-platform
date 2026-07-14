@@ -40,7 +40,7 @@ postsRouter.put(
   idParamValidation("id"),
   updatePostInputValidation,
   inputValidationResultMiddleware,
-  postsController.updatePostHandler.bind(postQueryValidation),
+  postsController.updatePostHandler.bind(postsController),
 );
 
 postsRouter.delete(
@@ -48,7 +48,7 @@ postsRouter.delete(
   superAdminGuardMiddleware,
   idParamValidation("id"),
   inputValidationResultMiddleware,
-  postsController.deletePostHandler.bind(postQueryValidation),
+  postsController.deletePostHandler.bind(postsController),
 );
 
 postsRouter.get(
