@@ -1,6 +1,6 @@
 export type RefreshTokenPayloadType = {
   userId: string;
   jti: string;
-  sessionId: string;
+  deviceId: string;
   tokenType: "refresh";
 };

@@ -5,11 +5,13 @@ import { BlogQueryInput } from "../types/blog-query.input";
 import { BlogViewModel } from "../types/blog-view-model";
 import { mapToPaginatedBlogViewModel } from "../mappers/map-to-blog-paginated-model.util";
 import { IBlogsQueryRepository } from "../interfaces/blogs.query.repository-interface";
-
+import { inject, injectable } from "inversify";
+import { BLOGS_QUERY_REPOSITORY } from "../../core/composition/di-tokens";
+@injectable()
 export class GetBlogsListQueryHandler {
- constructor(  private blogsQueryRepository: IBlogsQueryRepository) {
-
-  }
+  constructor(
+    @inject(BLOGS_QUERY_REPOSITORY) private blogsQueryRepository: IBlogsQueryRepository,
+  ) {}
   async findAllBlogs(query: BlogQueryInput): Promise<Result<PaginatedViewModel<BlogViewModel>>> {
     const { items, totalCount } = await this.blogsQueryRepository.findAllBlogs(query);
 
@@ -28,4 +30,3 @@ export class GetBlogsListQueryHandler {
     };
   }
 }
-

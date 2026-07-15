@@ -4,10 +4,12 @@ import { RefreshSessionEntity } from "../types/refresh-session/domain/refresh-se
 import { mapRefreshSessionDbToEntity } from "../mappers/map-refresh-session.db-to-entity.model";
 import { RotateRefreshTokenData } from "../types/refresh-session/data/rotate-refresh-token.data";
 import { IRefreshSessionRepository } from "../interfaces/refresh-session.repository-interface";
+import { injectable } from "inversify";
+
+@injectable()
 export class MongoRefreshSessionRepository implements IRefreshSessionRepository {
-  
-  async findRefreshSessionBySessionId(sessionId: string): Promise<RefreshSessionEntity | null> {
-    const document = await refreshSessionsCollection.findOne({ sessionId: sessionId });
+  async findRefreshSessionByDeviceId(deviceId: string): Promise<RefreshSessionEntity | null> {
+    const document = await refreshSessionsCollection.findOne({ deviceId });
     if (!document) {
       return null;
     }
@@ -42,12 +44,12 @@ export class MongoRefreshSessionRepository implements IRefreshSessionRepository 
   }
 
   async rotateRefreshTokenInSession(
-    sessionId: string,
+    deviceId: string,
     currentRefreshTokenId: string,
     data: RotateRefreshTokenData,
   ): Promise<boolean> {
     const updateResult = await refreshSessionsCollection.updateOne(
-      { sessionId: sessionId, "refreshToken.id": currentRefreshTokenId, isActive: true },
+      { deviceId, "refreshToken.id": currentRefreshTokenId, isActive: true },
       {
         $set: {
           "refreshToken.id": data.refreshToken.id,
@@ -59,9 +61,9 @@ export class MongoRefreshSessionRepository implements IRefreshSessionRepository 
     return updateResult.modifiedCount === 1;
   }
 
-  async invalidateRefreshSessionBySessionId(sessionId: string): Promise<boolean> {
+  async invalidateRefreshSessionByDeviceId(deviceId: string): Promise<boolean> {
     const updateResult = await refreshSessionsCollection.updateOne(
-      { sessionId: sessionId, isActive: true },
+      { deviceId, isActive: true },
       {
         $set: {
           isActive: false,
@@ -83,5 +85,3 @@ export class MongoRefreshSessionRepository implements IRefreshSessionRepository 
     return updateResult.modifiedCount > 0;
   }
 }
-
-export const mongoRefreshSessionRepository = new MongoRefreshSessionRepository();

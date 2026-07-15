@@ -1,11 +1,16 @@
+import { inject, injectable } from "inversify";
+import { POSTS_QUERY_REPOSITORY } from "../../core/composition/di-tokens";
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { IPostsQueryRepository } from "../interfaces/posts.query.repository-interface";
 import { mapToPostViewModel } from "../mappers/map-to-post-view-model.util";
 import { PostViewModel } from "../types/post-view-model";
 
+@injectable()
 export class GetPostQueryHandler {
-  constructor(private postsQueryRepository: IPostsQueryRepository) {}
+  constructor(
+    @inject(POSTS_QUERY_REPOSITORY) private postsQueryRepository: IPostsQueryRepository,
+  ) {}
   async findPostById(id: string): Promise<Result<PostViewModel>> {
     const post = await this.postsQueryRepository.findPostById(id);
 
@@ -24,4 +29,3 @@ export class GetPostQueryHandler {
     };
   }
 }
-

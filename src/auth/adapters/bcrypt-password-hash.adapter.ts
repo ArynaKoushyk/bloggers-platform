@@ -2,6 +2,9 @@ import bcrypt from "bcrypt";
 
 const SALT_ROUNDS = 10;
 
+import { injectable } from "inversify";
+
+@injectable()
 export class BcryptPasswordHashAdapter {
   async generateHash(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(SALT_ROUNDS);

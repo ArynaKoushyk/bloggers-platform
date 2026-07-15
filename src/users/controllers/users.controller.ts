@@ -1,20 +1,24 @@
-import { IUsersService } from "../../applications/interfaces/users.service.interface";
+import { IUsersService } from "../applications/interfaces/users.service.interface";
 import { Request, Response } from "express";
-import { HttpStatus } from "../../../core/types/http-statuses";
-import { RequestWithBody, RequestWithParams } from "../../../core/types/requests";
-import { ResultStatus } from "../../../core/result/resultCode";
-import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
-import { APIErrorResult } from "../../../core/result/result.type";
-import { CreateUserInputDto } from "../../dto/create-user.input.dto";
-import { UserViewModel } from "../../types/user-view-model";
-import { getUserQueryInput } from "../../helpers/get-user-query.input";
-import { GetUserQueryHandler } from "../../queries/get-user.query-handler";
-import { GetUsersListQueryHandler } from "../../queries/get-users-list.query-handler";
+import { HttpStatus } from "../../core/types/http-statuses";
+import { RequestWithBody, RequestWithParams } from "../../core/types/requests";
+import { ResultStatus } from "../../core/result/resultCode";
+import { resultCodeToHttpException } from "../../core/result/resultCodeToHttpException";
+import { APIErrorResult } from "../../core/result/result.type";
+import { CreateUserInputDto } from "../dto/create-user.input.dto";
+import { UserViewModel } from "../types/user-view-model";
+import { getUserQueryInput } from "../helpers/get-user-query.input";
+import { inject, injectable } from "inversify";
+import { USERS_SERVICE } from "../../core/composition/di-tokens";
+import { GetUserQueryHandler } from "../queries/get-user.query-handler";
+import { GetUsersListQueryHandler } from "../queries/get-users-list.query-handler";
 
+@injectable()
 export class UsersController {
-  constructor(private usersService: IUsersService,
-   private getUserQueryHandler:GetUserQueryHandler,
-  private getUsersListQueryHandler: GetUsersListQueryHandler
+  constructor(
+    @inject(USERS_SERVICE) private usersService: IUsersService,
+    @inject(GetUserQueryHandler) private getUserQueryHandler: GetUserQueryHandler,
+    @inject(GetUsersListQueryHandler) private getUsersListQueryHandler: GetUsersListQueryHandler,
   ) {}
 
   async createUserHandler(

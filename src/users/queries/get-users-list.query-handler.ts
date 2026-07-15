@@ -1,3 +1,4 @@
+import { USERS_QUERY_REPOSITORY } from "../../core/composition/di-tokens";
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { PaginatedViewModel } from "../../core/types/paginated-view.model";
@@ -5,9 +6,13 @@ import { IUsersQueryRepository } from "../applications/interfaces/users.reposito
 import { mapToPaginatedUserViewModel } from "../mappers/map-to-user-paginated-model.util";
 import { UserQueryInput } from "../types/user-query.input";
 import { UserViewModel } from "../types/user-view-model";
+import { injectable, inject } from "inversify";
 
+@injectable()
 export class GetUsersListQueryHandler {
-  constructor(private usersQueryRepository: IUsersQueryRepository) {}
+  constructor(
+    @inject(USERS_QUERY_REPOSITORY) private usersQueryRepository: IUsersQueryRepository,
+  ) {}
   async findAllUsers(query: UserQueryInput): Promise<Result<PaginatedViewModel<UserViewModel>>> {
     const { items, totalCount } = await this.usersQueryRepository.findAllUsers(query);
 

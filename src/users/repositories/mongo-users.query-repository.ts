@@ -4,6 +4,9 @@ import { UserQueryInput } from "../types/user-query.input";
 import { userCollection } from "../../db/mongo.db";
 import { IUsersQueryRepository } from "../applications/interfaces/users.repository.query-interface";
 
+import { injectable } from "inversify";
+
+@injectable()
 export class MongoUsersQueryRepository implements IUsersQueryRepository {
   async findAllUsers(
     query: UserQueryInput,

@@ -3,12 +3,10 @@ import { BlogQueryInput } from "../types/blog-query.input";
 import { blogCollection } from "../../db/mongo.db";
 import { BlogDbModel } from "../types/blog-db.model";
 import { IBlogsQueryRepository } from "../interfaces/blogs.query.repository-interface";
-
-
-
+import { injectable } from "inversify";
 
 //!! лучше через интерфейсы или абсрактные классы
-
+@injectable()
 export class MongoBlogsQueryRepository implements IBlogsQueryRepository {
   async findAllBlogs(
     query: BlogQueryInput,

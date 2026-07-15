@@ -19,19 +19,28 @@ import { CreateUserData } from "../../users/types/data/create-user.data";
 import { emailTemplates } from "../adapters/email-templates";
 import { RegistrationConfirmationInputDto } from "../dto/registration-confirmation.input.dto";
 import { RegistrationEmailResendingInputDto } from "../dto/registration-email-resending.input.dto";
-import { MongoRefreshSessionRepository } from "../repositories/mongo-refresh-session.repository";
 import { IAuthService } from "../interfaces/auth.service-interface";
 import { randomUUID } from "node:crypto";
 
-//!! поговорить про black и white list
+import { inject, injectable } from "inversify";
+import { REFRESH_SESSION_REPOSITORY } from "../../core/composition/di-tokens";
+import {
+  USERS_REPOSITORY,
+  PASSWORD_HASH_SERVICE,
+  JWT_SERVICE,
+  EMAIL_SERVICE,
+} from "../../core/composition/di-tokens";
+import { DeviceInfo } from "../types/device.info-type";
 const REFRESH_SESSION_LIFETIME_SECONDS = 20;
+@injectable()
+//!! поговорить про black и white list
 export class AuthService implements IAuthService {
   constructor(
-    private usersRepository: IUsersRepository,
-    private passwordHashService: IPasswordHashService,
-    private jwtService: IJwtService,
-    private emailService: IEmailService,
-    private refreshSessionRepository: IRefreshSessionRepository,
+    @inject(USERS_REPOSITORY) private usersRepository: IUsersRepository,
+    @inject(PASSWORD_HASH_SERVICE) private passwordHashService: IPasswordHashService,
+    @inject(JWT_SERVICE) private jwtService: IJwtService,
+    @inject(EMAIL_SERVICE) private emailService: IEmailService,
+    @inject(REFRESH_SESSION_REPOSITORY) private refreshSessionRepository: IRefreshSessionRepository,
   ) {}
 
   private checkUserCredentials = async (
@@ -53,7 +62,7 @@ export class AuthService implements IAuthService {
     return user;
   };
 
-  async login(dto: LoginInputDto): Promise<Result<LoginSuccessViewModel>> {
+  async login(dto: LoginInputDto, deviceInfo: DeviceInfo): Promise<Result<LoginSuccessViewModel>> {
     const { loginOrEmail, password } = dto;
     const user = await this.checkUserCredentials(loginOrEmail, password);
     if (!user) {
@@ -66,16 +75,19 @@ export class AuthService implements IAuthService {
     const accessToken = await this.jwtService.createAccessToken({ userId: user.id });
     const refreshTokenPayload: RefreshTokenPayloadType = {
       userId: user.id,
-      jti: crypto.randomUUID(),
-      sessionId: crypto.randomUUID(),
+      jti: randomUUID(),
+      deviceId: randomUUID(),
       tokenType: "refresh",
     };
     const refreshToken = await this.jwtService.createRefreshToken(refreshTokenPayload);
     const issuedAt = new Date();
     const expiresAt = add(issuedAt, { seconds: REFRESH_SESSION_LIFETIME_SECONDS });
+
     const refreshSessionData: CreateRefreshSessionData = {
       userId: user.id,
-      sessionId: refreshTokenPayload.sessionId,
+      deviceId: refreshTokenPayload.deviceId,
+      deviceName: deviceInfo.deviceName,
+      ip: deviceInfo.ip,
       isActive: true,
       refreshToken: {
         id: refreshTokenPayload.jti,
@@ -107,7 +119,7 @@ export class AuthService implements IAuthService {
       },
     };
     const isRefreshTokenRotated = await this.refreshSessionRepository.rotateRefreshTokenInSession(
-      payload.sessionId,
+      payload.deviceId,
       payload.jti,
       rotateRefreshTokenData,
     );
@@ -122,7 +134,7 @@ export class AuthService implements IAuthService {
     const newRefreshTokenPayload: RefreshTokenPayloadType = {
       userId: payload.userId,
       jti: rotateRefreshTokenData.refreshToken.id,
-      sessionId: payload.sessionId,
+      deviceId: payload.deviceId,
       tokenType: "refresh",
     };
     const newAccessToken = await this.jwtService.createAccessToken(newAccessTokenPayload);
@@ -146,8 +158,8 @@ export class AuthService implements IAuthService {
     }
 
     const isRefreshSessionInvalidated =
-      await this.refreshSessionRepository.invalidateRefreshSessionBySessionId(
-        refreshTokenPayload.sessionId,
+      await this.refreshSessionRepository.invalidateRefreshSessionByDeviceId(
+        refreshTokenPayload.deviceId,
       );
     if (!isRefreshSessionInvalidated) {
       return {
@@ -184,7 +196,7 @@ export class AuthService implements IAuthService {
     }
 
     const passwordHash = await this.passwordHashService.generateHash(password);
-    const confirmationCode = crypto.randomUUID();
+    const confirmationCode = randomUUID();
     const expirationDate = add(new Date(), {
       hours: 1,
       minutes: 30,
@@ -285,7 +297,7 @@ export class AuthService implements IAuthService {
       };
     }
 
-    const confirmationCode = crypto.randomUUID();
+    const confirmationCode = randomUUID();
     const expirationDate = add(new Date(), {
       hours: 1,
       minutes: 30,

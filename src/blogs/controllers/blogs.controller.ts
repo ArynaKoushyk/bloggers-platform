@@ -16,12 +16,16 @@ import { UpdateBlogInputDto } from "../dto/update-blog.input.dto";
 import { GetBlogsListQueryHandler } from "../queries/get-blogs-list.query-handler";
 import { GetBlogQueryHandler } from "../queries/get-blog.query-handler";
 import { DeleteBlogWithPostsUseCase } from "../use-cases/delete-blog-with-posts.use-case";
+import { inject, injectable } from "inversify";
+import { BLOGS_SERVICE } from "../../core/composition/di-tokens";
 
+@injectable()
 export class BlogsController {
   constructor(
-    private blogsService: IBlogsService,
-    private getBlogsQueryHandler: GetBlogQueryHandler,
-    private getBlogsListQueryHandler: GetBlogsListQueryHandler,
+    @inject(BLOGS_SERVICE) private blogsService: IBlogsService,
+    @inject(GetBlogQueryHandler) private getBlogsQueryHandler: GetBlogQueryHandler,
+    @inject(GetBlogsListQueryHandler) private getBlogsListQueryHandler: GetBlogsListQueryHandler,
+    @inject(DeleteBlogWithPostsUseCase)
     private deleteBlogWithPostsUseCase: DeleteBlogWithPostsUseCase,
   ) {}
 

@@ -6,16 +6,24 @@ import { CreateBlogData } from "../types/data/create-blog.data";
 import { UpdateBlogData } from "../types/data/update-blog.data";
 import { CreateBlogInputDto } from "../dto/create-blog.input.dto";
 import { UpdateBlogInputDto } from "../dto/update-blog.input.dto";
-import { MongoBlogsRepository } from "../repositories/mongo-blogs.repository";
 import { IBlogsService } from "../interfaces/blogs.service-interface";
+import { inject, injectable } from "inversify";
+import { BLOGS_REPOSITORY } from "../../core/composition/di-tokens";
 
+// const blogsRepository: ServiceIdentifier<IBlogsRepository> = Symbol.for("blogsRepository");
+@injectable()
 export class BlogsService implements IBlogsService {
   // private blogsRepository: IBlogsRepository;
   // constructor(blogsRepository: IBlogsRepository) {
   //   this.blogsRepository = blogsRepository;
   // }
 
-  constructor(private blogsRepository: IBlogsRepository) {}
+  //   export const DI_TOKENS = {
+  //   BlogsRepository: Symbol.for("BlogsRepository"),
+  // };
+  
+
+  constructor(@inject(BLOGS_REPOSITORY) private blogsRepository: IBlogsRepository) {}
   async findBlogById(id: string): Promise<Result<BlogEntity>> {
     const blog = await this.blogsRepository.findBlogById(id);
     if (!blog) {

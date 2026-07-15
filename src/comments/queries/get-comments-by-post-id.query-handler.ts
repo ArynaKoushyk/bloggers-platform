@@ -1,3 +1,4 @@
+import { COMMENTS_QUERY_REPOSITORY, POSTS_REPOSITORY } from "../../core/composition/di-tokens";
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { PaginatedViewModel } from "../../core/types/paginated-view.model";
@@ -6,12 +7,13 @@ import { ICommentsQueryRepository } from "../interfaces/comments.query.repositor
 import { mapToPaginatedCommentViewModel } from "../mappers/map-to-paginated-comment-model.util";
 import { CommentQueryInput } from "../types/comment-query.input";
 import { CommentViewModel } from "../types/comment-view-model";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class GetCommentsByPostIdQueryHandler {
-
   constructor(
-    private commentsQueryRepository: ICommentsQueryRepository,
-    private postsRepository: IPostsRepository,
+    @inject(COMMENTS_QUERY_REPOSITORY) private commentsQueryRepository: ICommentsQueryRepository,
+    @inject(POSTS_REPOSITORY) private postsRepository: IPostsRepository,
   ) {}
   async findCommentsByPostId(
     postId: string,
@@ -46,5 +48,3 @@ export class GetCommentsByPostIdQueryHandler {
     };
   }
 }
-
-

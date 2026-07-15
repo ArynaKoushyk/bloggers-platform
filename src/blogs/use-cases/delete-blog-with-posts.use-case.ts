@@ -1,12 +1,15 @@
+import { inject, injectable } from "inversify";
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { IPostsService } from "../../posts/interfaces/posts.service-interface";
 import { IBlogsService } from "../interfaces/blogs.service-interface";
+import { BLOGS_SERVICE, POSTS_SERVICE } from "../../core/composition/di-tokens";
 
+@injectable()
 export class DeleteBlogWithPostsUseCase {
   constructor(
-    private blogsService: IBlogsService,
-    private postsService: IPostsService,
+    @inject(BLOGS_SERVICE) private blogsService: IBlogsService,
+    @inject(POSTS_SERVICE) private postsService: IPostsService,
   ) {}
 
   async execute(blogId: string): Promise<Result<null>> {

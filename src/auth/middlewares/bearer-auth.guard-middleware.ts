@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/http-statuses";
-import { mongoUsersRepository } from "../../users/repositories/mongo-users.repository";
-import { jwtService } from "../../core/composition/composition-root";
+import { jwtService, usersRepository } from "../../core/composition/composition-root";
 
 //!! мидлвар надо перписывать на классы
 //как передать адптер
@@ -23,7 +22,7 @@ export const bearerAuthGuardMiddleware = async (
     return res.sendStatus(HttpStatus.Unauthorized);
   }
 
-  const user = await mongoUsersRepository.findUserById(payload.userId);
+  const user = await usersRepository.findUserById(payload.userId);
   if (!user) {
     return res.sendStatus(HttpStatus.Unauthorized);
   }

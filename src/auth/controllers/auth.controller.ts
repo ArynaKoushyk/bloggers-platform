@@ -1,22 +1,29 @@
-import { IAuthService } from "../../interfaces/auth.service-interface";
-import { LoginInputDto } from "../../dto/login.input.dto";
-import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
-import { SETTINGS } from "../../../core/settings/settings";
-import { RequestWithBody } from "../../../core/types/requests";
+import { IAuthService } from "../interfaces/auth.service-interface";
+import { LoginInputDto } from "../dto/login.input.dto";
+import { resultCodeToHttpException } from "../../core/result/resultCodeToHttpException";
+import { SETTINGS } from "../../core/settings/settings";
+import { RequestWithBody } from "../../core/types/requests";
 import { Request, Response } from "express";
-import { ResultStatus } from "../../../core/result/resultCode";
-import { HttpStatus } from "../../../core/types/http-statuses";
-import { MeViewModel } from "../../types/me-view-model";
-import { RegistrationConfirmationInputDto } from "../../dto/registration-confirmation.input.dto";
-import { RegistrationEmailResendingInputDto } from "../../dto/registration-email-resending.input.dto";
-import { RegistrationInputDto } from "../../dto/registration.input.dto";
+import { ResultStatus } from "../../core/result/resultCode";
+import { HttpStatus } from "../../core/types/http-statuses";
+import { MeViewModel } from "../types/me-view-model";
+import { RegistrationConfirmationInputDto } from "../dto/registration-confirmation.input.dto";
+import { RegistrationEmailResendingInputDto } from "../dto/registration-email-resending.input.dto";
+import { RegistrationInputDto } from "../dto/registration.input.dto";
+import { inject, injectable } from "inversify";
+import { AUTH_SERVICE } from "../../core/composition/di-tokens";
 
+@injectable()
 export class AuthController {
-  constructor(private authService: IAuthService) {}
+  constructor(@inject(AUTH_SERVICE) private authService: IAuthService) {}
 
   async loginHandler(req: RequestWithBody<LoginInputDto>, res: Response) {
     const loginDto = req.body;
-    const loginResult = await this.authService.login(loginDto);
+    const deviceInfo = {
+      ip: req.ip as string,
+      deviceName: req.headers["user-agent"] as string,
+    };
+    const loginResult = await this.authService.login(loginDto, deviceInfo);
     if (loginResult.status === ResultStatus.Unauthorized) {
       return res.sendStatus(HttpStatus.Unauthorized);
     }

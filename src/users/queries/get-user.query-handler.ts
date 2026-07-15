@@ -4,8 +4,14 @@ import { IUsersQueryRepository } from "../applications/interfaces/users.reposito
 import { mapToUserViewModel } from "../mappers/map-to-user-view-model.util";
 import { UserViewModel } from "../types/user-view-model";
 
+import { inject, injectable } from "inversify";
+import { USERS_QUERY_REPOSITORY } from "../../core/composition/di-tokens";
+
+@injectable()
 export class GetUserQueryHandler {
-  constructor(private usersQueryRepository: IUsersQueryRepository) {}
+  constructor(
+    @inject(USERS_QUERY_REPOSITORY) private usersQueryRepository: IUsersQueryRepository,
+  ) {}
   async findUserById(id: string): Promise<Result<UserViewModel>> {
     const user = await this.usersQueryRepository.findUserById(id);
 
@@ -24,5 +30,3 @@ export class GetUserQueryHandler {
     };
   }
 }
-
-

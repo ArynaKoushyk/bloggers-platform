@@ -5,7 +5,9 @@ import { mapCommentDbToEntity } from "../mappers/map-comment.db-to-entity.model"
 import { CreateCommentData } from "../types/data/create-comment.data";
 import { UpdateCommentData } from "../types/data/update-comment.data";
 import { ICommentsRepository } from "../interfaces/comments.repository-interfaces";
+import { injectable } from "inversify";
 
+@injectable()
 export class MongoCommentsRepository implements ICommentsRepository {
   async findCommentById(id: string): Promise<CommentEntity | null> {
     const document = await commentCollection.findOne({ _id: new ObjectId(id) });

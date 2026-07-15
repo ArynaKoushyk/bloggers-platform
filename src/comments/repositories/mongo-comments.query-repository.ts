@@ -3,7 +3,10 @@ import { CommentQueryInput } from "../types/comment-query.input";
 import { CommentDbModel } from "../types/comment-db.model";
 import { commentCollection } from "../../db/mongo.db";
 import { ICommentsQueryRepository } from "../interfaces/comments.query.repository-interface";
+import { injectable } from "inversify";
 
+
+@injectable()
 export class MongoCommentsQueryRepository implements ICommentsQueryRepository {
   async findCommentsByPostId(
     postId: string,

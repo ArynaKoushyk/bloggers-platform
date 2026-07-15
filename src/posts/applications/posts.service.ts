@@ -9,11 +9,14 @@ import { CreatePostByBlogIdInputDto } from "../dto/create-post-by-blog-id.input.
 import { IBlogsRepository } from "../../blogs/interfaces/blogs.repository-interface";
 import { IPostsService } from "../interfaces/posts.service-interface";
 import { IPostsRepository } from "../interfaces/posts.repository-interface";
+import { inject, injectable } from "inversify";
+import { BLOGS_REPOSITORY, POSTS_REPOSITORY } from "../../core/composition/di-tokens";
 
+@injectable()
 export class PostsService implements IPostsService {
   constructor(
-    private postsRepository: IPostsRepository,
-    private blogsRepository: IBlogsRepository,
+    @inject(POSTS_REPOSITORY) private postsRepository: IPostsRepository,
+    @inject(BLOGS_REPOSITORY) private blogsRepository: IBlogsRepository,
   ) {}
   async findPostById(id: string): Promise<Result<PostEntity>> {
     const post = await this.postsRepository.findPostById(id);

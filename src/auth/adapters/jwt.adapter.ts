@@ -3,8 +3,11 @@ import { JwtPayloadType } from "../types/jwt-payload.type";
 import jwt from "jsonwebtoken";
 import { RefreshTokenPayloadType } from "../types/refresh-session/refresh-token-payload.type";
 import { IJwtService } from "../interfaces/jwt.service-interface";
+import { injectable } from "inversify";
 
-//!! использовать разные секреты для access и refresh, нужны ли все эти прoвeрки payload
+//!! использовать разные секреты для access и refresh, нужны ли все эти прoвeрки payloadimport { injectable } from "inversify";
+
+@injectable()
 export class JwtAdapter implements IJwtService {
   async createAccessToken(payload: JwtPayloadType): Promise<string> {
     return jwt.sign(payload, SETTINGS.ACCESS_TOKEN_SECRET, {
@@ -44,7 +47,7 @@ export class JwtAdapter implements IJwtService {
         typeof payload !== "object" ||
         typeof payload.userId !== "string" ||
         typeof payload.jti !== "string" ||
-        typeof payload.sessionId !== "string" ||
+        typeof payload.deviceId !== "string" ||
         payload.tokenType !== "refresh"
       ) {
         return null;
@@ -52,7 +55,7 @@ export class JwtAdapter implements IJwtService {
 
       return {
         userId: payload.userId,
-        sessionId: payload.sessionId,
+        deviceId: payload.deviceId,
         jti: payload.jti,
         tokenType: "refresh",
       };

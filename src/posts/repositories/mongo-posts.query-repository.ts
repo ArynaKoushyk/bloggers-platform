@@ -2,9 +2,10 @@ import { ObjectId, WithId } from "mongodb";
 import { postCollection } from "../../db/mongo.db";
 import { PostQueryInput } from "../types/post-query.input";
 import { PostDbModel } from "../types/post-db.model";
-import { IBlogsQueryRepository } from "../../blogs/interfaces/blogs.query.repository-interface";
 import { IPostsQueryRepository } from "../interfaces/posts.query.repository-interface";
+import { injectable } from "inversify";
 
+@injectable()
 export class MongoPostsQueryRepository implements IPostsQueryRepository {
   async findAllPosts(
     query: PostQueryInput,

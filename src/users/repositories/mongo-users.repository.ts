@@ -4,7 +4,9 @@ import { UserEntity } from "../types/domain/user-entity.model";
 import { mapUserDbToEntity } from "../mappers/map-user.db-to-entity.model";
 import { CreateUserData } from "../types/data/create-user.data";
 import { UpdateEmailConfirmation } from "../types/data/update-email-confirmation.data";
+import { injectable } from "inversify";
 
+@injectable()
 export class MongoUsersRepository {
   async findUserById(id: string): Promise<UserEntity | null> {
     const document = await userCollection.findOne({ _id: new ObjectId(id) });

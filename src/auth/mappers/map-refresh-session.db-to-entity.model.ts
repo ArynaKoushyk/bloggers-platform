@@ -6,9 +6,10 @@ export function mapRefreshSessionDbToEntity(
   refreshSession: WithId<RefreshSessionDbModel>,
 ): RefreshSessionEntity {
   return {
-    id: refreshSession._id.toString(),
     userId: refreshSession.userId,
-    sessionId: refreshSession.sessionId,
+    deviceId: refreshSession.deviceId,
+    deviceName: refreshSession.deviceName,
+    ip: refreshSession.ip,
     isActive: refreshSession.isActive,
     refreshToken: {
       id: refreshSession.refreshToken.id,

@@ -5,7 +5,9 @@ import { mapPostDbToEntity } from "../mappers/map-post.db-to-entity.model";
 import { CreatePostData } from "../types/data/create-post.data";
 import { UpdatePostData } from "../types/data/update-post.data";
 import { IPostsRepository } from "../interfaces/posts.repository-interface";
+import { injectable } from "inversify";
 
+@injectable()
 export class MongoPostsRepository implements IPostsRepository {
   async findPostById(id: string): Promise<PostEntity | null> {
     const document = await postCollection.findOne({ _id: new ObjectId(id) });

@@ -5,3 +5,26 @@
 спросить про dotenv 
 разница black/white list
 мальтидивайсность
+
+
+@injectable()
+export class BlogsService implements IBlogsService {
+
+
+
+//   export const DI_TOKENS = {
+//   BlogsRepository: Symbol.for("BlogsRepository"),
+// };
+  constructor(@inject(MongoBlogsRepository) private blogsRepository: IBlogsRepository) {}
+
+
+
+   @injectable()
+   export class BlogsController {
+     constructor(
+       @inject(BLOGS_SERVICE) private blogsService: IBlogsService,
+       @inject(GetBlogQueryHandler) private getBlogsQueryHandler: GetBlogQueryHandler,
+       @inject(GetBlogsListQueryHandler) private getBlogsListQueryHandler: GetBlogsListQueryHandler,
+       @inject(DeleteBlogWithPostsUseCase)
+       private deleteBlogWithPostsUseCase: DeleteBlogWithPostsUseCase,
+     ) {}

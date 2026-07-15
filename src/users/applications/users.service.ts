@@ -7,10 +7,14 @@ import { CreateUserData } from "../types/data/create-user.data";
 import { IUsersRepository } from "./interfaces/users.repository-interface";
 import { IUsersService } from "./interfaces/users.service.interface";
 
+import { inject, injectable } from "inversify";
+import { PASSWORD_HASH_SERVICE, USERS_REPOSITORY } from "../../core/composition/di-tokens";
+
+@injectable()
 export class UsersService implements IUsersService {
   constructor(
-    private usersRepository: IUsersRepository,
-    private passwordHashService: IPasswordHashService,
+    @inject(USERS_REPOSITORY) private usersRepository: IUsersRepository,
+    @inject(PASSWORD_HASH_SERVICE) private passwordHashService: IPasswordHashService,
   ) {}
   async findUserById(id: string): Promise<Result<UserEntity>> {
     const user = await this.usersRepository.findUserById(id);

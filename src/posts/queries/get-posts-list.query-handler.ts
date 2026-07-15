@@ -5,9 +5,14 @@ import { ResultStatus } from "../../core/result/resultCode";
 import { mapToPaginatedPostViewModel } from "../mappers/map-to-paginated-post-model.util";
 import { Result } from "../../core/result/result.type";
 import { IPostsQueryRepository } from "../interfaces/posts.query.repository-interface";
+import { POSTS_QUERY_REPOSITORY } from "../../core/composition/di-tokens";
+import { inject, injectable } from "inversify";
 
+@injectable()
 export class GetPostListQueryHandler {
-  constructor(private postsQueryRepository: IPostsQueryRepository) {}
+  constructor(
+    @inject(POSTS_QUERY_REPOSITORY) private postsQueryRepository: IPostsQueryRepository,
+  ) {}
   async findAllPosts(query: PostQueryInput): Promise<Result<PaginatedViewModel<PostViewModel>>> {
     const { items, totalCount } = await this.postsQueryRepository.findAllPosts(query);
 

@@ -5,8 +5,10 @@ import { CreateBlogData } from "../types/data/create-blog.data";
 import { UpdateBlogData } from "../types/data/update-blog.data";
 import { mapBlogDbToEntity } from "../mappers/map-blog.db-to-entity.model";
 import { IBlogsRepository } from "../interfaces/blogs.repository-interface";
+import { injectable } from "inversify";
 
 //!!solid - dipendency inversion(injection), inversion of control
+@injectable()
 export class MongoBlogsRepository implements IBlogsRepository {
   async findBlogById(id: string): Promise<BlogEntity | null> {
     const document = await blogCollection.findOne({ _id: new ObjectId(id) });

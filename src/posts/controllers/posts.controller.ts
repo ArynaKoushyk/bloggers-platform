@@ -18,12 +18,16 @@ import { CreatePostInputDto } from "../dto/create-post.input.dto";
 import { getPostQueryInput } from "../helpers/get-post-query.input";
 import { PaginatedViewModel } from "../../core/types/paginated-view.model";
 import { UpdatePostInputDto } from "../dto/update-post.input.dto";
+import { inject, injectable } from "inversify";
+import { POSTS_SERVICE } from "../../core/composition/di-tokens";
 
+@injectable()
 export class PostsController {
   constructor(
-    private postsService: IPostsService,
-    private getPostQueryHandler: GetPostQueryHandler,
-    private getPostListQueryHandler: GetPostListQueryHandler,
+    @inject(POSTS_SERVICE) private postsService: IPostsService,
+    @inject(GetPostQueryHandler) private getPostQueryHandler: GetPostQueryHandler,
+    @inject(GetPostListQueryHandler) private getPostListQueryHandler: GetPostListQueryHandler,
+    @inject(GetPostsByBlogIdQueryHandler)
     private getPostsByBlogIdQueryHandler: GetPostsByBlogIdQueryHandler,
   ) {}
 

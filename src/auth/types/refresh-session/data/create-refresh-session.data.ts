@@ -1,7 +1,8 @@
-
 export type CreateRefreshSessionData = {
   userId: string;
-  sessionId: string;
+  deviceId: string;
+  deviceName: string;
+  ip: string;
   isActive: boolean;
   refreshToken: {
     id: string;

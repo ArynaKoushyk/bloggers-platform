@@ -4,8 +4,14 @@ import { ICommentsQueryRepository } from "../interfaces/comments.query.repositor
 import { mapToCommentViewModel } from "../mappers/map-to-comment-view-model.util";
 import { CommentViewModel } from "../types/comment-view-model";
 
+import { inject, injectable } from "inversify";
+import { COMMENTS_QUERY_REPOSITORY } from "../../core/composition/di-tokens";
+
+@injectable()
 export class GetCommentQueryHandler {
-  constructor(private commentsQueryRepository: ICommentsQueryRepository) {}
+  constructor(
+    @inject(COMMENTS_QUERY_REPOSITORY) private commentsQueryRepository: ICommentsQueryRepository,
+  ) {}
   async findCommentById(id: string): Promise<Result<CommentViewModel>> {
     const comment = await this.commentsQueryRepository.findCommentById(id);
 
@@ -24,4 +30,3 @@ export class GetCommentQueryHandler {
     };
   }
 }
-

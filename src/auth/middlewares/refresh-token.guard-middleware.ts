@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../../core/types/http-statuses";
-import { mongoRefreshSessionRepository } from "../repositories/mongo-refresh-session.repository";
 import { SETTINGS } from "../../core/settings/settings";
-import { jwtService } from "../../core/composition/composition-root";
-
+import { jwtService, refreshSessionRepository } from "../../core/composition/composition-root";
 
 export const refreshTokenGuardMiddleware = async (
   req: Request,
@@ -20,8 +18,8 @@ export const refreshTokenGuardMiddleware = async (
     return res.sendStatus(HttpStatus.Unauthorized);
   }
 
-  const currentRefreshSession = await mongoRefreshSessionRepository.findRefreshSessionBySessionId(
-    payload.sessionId,
+  const currentRefreshSession = await refreshSessionRepository.findRefreshSessionByDeviceId(
+    payload.deviceId,
   );
   if (!currentRefreshSession) {
     return res.sendStatus(HttpStatus.Unauthorized);

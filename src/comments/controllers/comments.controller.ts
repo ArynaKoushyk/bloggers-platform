@@ -1,22 +1,27 @@
-import { ICommentsService } from "../../interfaces/comments.service-interfaces";
+import { ICommentsService } from "../interfaces/comments.service-interfaces";
 import { Response } from "express";
-import { APIErrorResult } from "../../../core/result/result.type";
-import { RequestWithParams, RequestWithParamsAndBody } from "../../../core/types/requests";
-import { CreateCommentInputDto } from "../../dto/create-comment.input.dto";
-import { CommentViewModel } from "../../types/comment-view-model";
-import { ResultStatus } from "../../../core/result/resultCode";
-import { resultCodeToHttpException } from "../../../core/result/resultCodeToHttpException";
-import { HttpStatus } from "../../../core/types/http-statuses";
-import { PaginatedViewModel } from "../../../core/types/paginated-view.model";
-import { getCommentQueryInput } from "../../helpers/get-comment-query.input";
-import { UpdateCommentInputDto } from "../../dto/update-comment.input.dto";
-import { GetCommentQueryHandler } from "../../queries/get-comment.query-handler";
-import { GetCommentsByPostIdQueryHandler } from "../../queries/get-comments-by-post-id.query-handler";
+import { APIErrorResult } from "../../core/result/result.type";
+import { RequestWithParams, RequestWithParamsAndBody } from "../../core/types/requests";
+import { CreateCommentInputDto } from "../dto/create-comment.input.dto";
+import { CommentViewModel } from "../types/comment-view-model";
+import { ResultStatus } from "../../core/result/resultCode";
+import { resultCodeToHttpException } from "../../core/result/resultCodeToHttpException";
+import { HttpStatus } from "../../core/types/http-statuses";
+import { PaginatedViewModel } from "../../core/types/paginated-view.model";
+import { getCommentQueryInput } from "../helpers/get-comment-query.input";
+import { UpdateCommentInputDto } from "../dto/update-comment.input.dto";
+import { GetCommentQueryHandler } from "../queries/get-comment.query-handler";
+import { GetCommentsByPostIdQueryHandler } from "../queries/get-comments-by-post-id.query-handler";
 
+import { injectable, inject } from "inversify";
+import { COMMENTS_SERVICE } from "../../core/composition/di-tokens";
+
+@injectable()
 export class CommentsController {
   constructor(
-    private commentsService: ICommentsService,
-    private getCommentQueryHandler: GetCommentQueryHandler,
+    @inject(COMMENTS_SERVICE) private commentsService: ICommentsService,
+    @inject(GetCommentQueryHandler) private getCommentQueryHandler: GetCommentQueryHandler,
+    @inject(GetCommentsByPostIdQueryHandler)
     private getCommentsByPostIdQueryHandler: GetCommentsByPostIdQueryHandler,
   ) {}
 
@@ -101,5 +106,3 @@ export class CommentsController {
     return res.sendStatus(HttpStatus.NoContent);
   }
 }
-
-

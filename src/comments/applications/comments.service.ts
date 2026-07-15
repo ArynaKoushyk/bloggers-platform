@@ -9,11 +9,14 @@ import { UpdateCommentData } from "../types/data/update-comment.data";
 import { ICommentsRepository } from "../interfaces/comments.repository-interfaces";
 import { ICommentsService } from "../interfaces/comments.service-interfaces";
 import { IPostsRepository } from "../../posts/interfaces/posts.repository-interface";
+import { inject, injectable } from "inversify";
+import { COMMENTS_REPOSITORY, POSTS_REPOSITORY } from "../../core/composition/di-tokens";
 
+@injectable()
 export class CommentsService implements ICommentsService {
   constructor(
-    private commentsRepository: ICommentsRepository,
-    private postsRepository: IPostsRepository,
+    @inject(COMMENTS_REPOSITORY) private commentsRepository: ICommentsRepository,
+    @inject(POSTS_REPOSITORY) private postsRepository: IPostsRepository,
   ) {}
   async findCommentById(id: string): Promise<Result<CommentEntity>> {
     const comment = await this.commentsRepository.findCommentById(id);
