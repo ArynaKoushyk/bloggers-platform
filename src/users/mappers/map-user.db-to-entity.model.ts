@@ -14,5 +14,9 @@ export function mapUserDbToEntity(user: WithId<UserDbModel>): UserEntity {
       expirationDate: user.emailConfirmation.expirationDate,
       isConfirmed: user.emailConfirmation.isConfirmed,
     },
+    passwordRecovery: {
+      recoveryCode: user.passwordRecovery.recoveryCode,
+      expirationDate: user.passwordRecovery.expirationDate,
+    },
   };
 }

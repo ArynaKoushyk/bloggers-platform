@@ -1,4 +1,4 @@
-export type RefreshSessionDbModel = {
+export type CreateAuthSessionData = {
   userId: string;
   deviceId: string;
   deviceName: string;

@@ -4,6 +4,7 @@ import {
   BLOGS_PATH,
   COMMENTS_PATH,
   POSTS_PATH,
+  SECURITY_PATH,
   TESTING_PATH,
   USERS_PATH,
 } from "./core/paths/paths";
@@ -12,6 +13,7 @@ import { postsRouter } from "./posts/routers/posts.router";
 import { blogsRouter } from "./blogs/routers/blogs.router";
 import { usersRouter } from "./users/routers/users.router";
 import { authRouter } from "./auth/routers/auth.router";
+import { securityDevicesRouter } from "./auth/routers/security-devices.router";
 import { commentsRouter } from "./comments/routers/comments.router";
 import cookieParser from "cookie-parser";
 
@@ -28,6 +30,7 @@ export const setupApp = (app: Express) => {
   app.use(BLOGS_PATH, blogsRouter);
   app.use(USERS_PATH, usersRouter);
   app.use(AUTH_PATH, authRouter);
+  app.use(SECURITY_PATH, securityDevicesRouter);
   app.use(COMMENTS_PATH, commentsRouter);
 
   return app;

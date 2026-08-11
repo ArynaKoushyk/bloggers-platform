@@ -57,9 +57,13 @@ export class UsersService implements IUsersService {
       passwordHash,
       createdAt: new Date().toISOString(),
       emailConfirmation: {
-        confirmationCode: "",
-        expirationDate: new Date(),
+        confirmationCode: null,
+        expirationDate: null,
         isConfirmed: true,
+      },
+      passwordRecovery: {
+        recoveryCode: null,
+        expirationDate: null,
       },
     };
     const userId = await this.usersRepository.createUser(createData);

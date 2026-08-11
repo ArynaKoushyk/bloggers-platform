@@ -4,7 +4,8 @@ import {
   commentCollection,
   postCollection,
   userCollection,
-  refreshSessionsCollection,
+  authSessionsCollection,
+  apiRequestLogsCollection,
 } from "../../db/mongo.db";
 import { HttpStatus } from "../../core/types/http-statuses";
 export const testingRouter = Router({});
@@ -15,7 +16,8 @@ testingRouter.delete("/all-data", async (req: Request, res: Response) => {
     postCollection.deleteMany({}),
     userCollection.deleteMany({}),
     commentCollection.deleteMany({}),
-    refreshSessionsCollection.deleteMany({}),
+    authSessionsCollection.deleteMany({}),
+    apiRequestLogsCollection.deleteMany({}),
   ]);
   return res.sendStatus(HttpStatus.NoContent);
 });

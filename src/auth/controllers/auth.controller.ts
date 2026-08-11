@@ -12,6 +12,8 @@ import { RegistrationEmailResendingInputDto } from "../dto/registration-email-re
 import { RegistrationInputDto } from "../dto/registration.input.dto";
 import { inject, injectable } from "inversify";
 import { AUTH_SERVICE } from "../../core/composition/di-tokens";
+import { PasswordRecoveryInputDto } from "../dto/password-recovery.input.dto";
+import { NewPasswordRecoveryInputDto } from "../dto/new-password-recovery.input.dto";
 
 @injectable()
 export class AuthController {
@@ -43,12 +45,14 @@ export class AuthController {
   }
 
   async logoutHandler(req: Request, res: Response) {
-    const refreshToken = req.refreshToken;
-    if (!refreshToken) {
+    const refreshTokenPayload = req.refreshTokenPayload;
+    if (!refreshTokenPayload) {
       return res.sendStatus(HttpStatus.Unauthorized);
     }
 
-    const logoutResult = await this.authService.logout(refreshToken);
+    const { userId, deviceId } = refreshTokenPayload;
+
+    const logoutResult = await this.authService.logout(userId, deviceId);
     if (logoutResult.status === ResultStatus.Unauthorized) {
       return res.sendStatus(HttpStatus.Unauthorized);
     }
@@ -133,6 +137,42 @@ export class AuthController {
     if (result.status !== ResultStatus.Success) {
       return res.status(resultCodeToHttpException(result.status)).send({
         errorsMessages: result.errorsMessages,
+      });
+    }
+
+    return res.sendStatus(HttpStatus.NoContent);
+  }
+
+  async sendPasswordRecoveryEmailHandler(
+    req: RequestWithBody<PasswordRecoveryInputDto>,
+    res: Response,
+  ) {
+    const passwordRecoveryInput = req.body;
+
+    const passwordRecoveryResult =
+      await this.authService.sendPasswordRecoveryEmail(passwordRecoveryInput);
+
+    if (passwordRecoveryResult.status !== ResultStatus.Success) {
+      return res.status(resultCodeToHttpException(passwordRecoveryResult.status)).send({
+        errorsMessages: passwordRecoveryResult.errorsMessages,
+      });
+    }
+
+    return res.sendStatus(HttpStatus.NoContent);
+  }
+
+  async resetPasswordWithRecoveryCodeHandler(
+    req: RequestWithBody<NewPasswordRecoveryInputDto>,
+    res: Response,
+  ) {
+    const passwordResetInput = req.body;
+
+    const passwordResetResult =
+      await this.authService.resetPasswordWithRecoveryCode(passwordResetInput);
+
+    if (passwordResetResult.status !== ResultStatus.Success) {
+      return res.status(resultCodeToHttpException(passwordResetResult.status)).send({
+        errorsMessages: passwordResetResult.errorsMessages,
       });
     }
 

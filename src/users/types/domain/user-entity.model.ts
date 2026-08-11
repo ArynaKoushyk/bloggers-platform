@@ -1,4 +1,5 @@
 import { EmailConfirmationModel } from "../email-confirmation.model";
+import { RecoveryPasswordModel } from "../recovery-password.model";
 
 export type UserEntity = {
   id: string;
@@ -7,4 +8,5 @@ export type UserEntity = {
   email: string;
   createdAt: string;
   emailConfirmation: EmailConfirmationModel;
+  passwordRecovery: RecoveryPasswordModel;
 };

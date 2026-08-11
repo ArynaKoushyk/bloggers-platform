@@ -1,7 +1,7 @@
 import { SETTINGS } from "../../core/settings/settings";
 import { JwtPayloadType } from "../types/jwt-payload.type";
 import jwt from "jsonwebtoken";
-import { RefreshTokenPayloadType } from "../types/refresh-session/refresh-token-payload.type";
+import { RefreshTokenPayloadType } from "../types/auth-session/refresh-token-payload.type";
 import { IJwtService } from "../interfaces/jwt.service-interface";
 import { injectable } from "inversify";
 

@@ -1,4 +1,5 @@
 import { EmailConfirmationModel } from "../email-confirmation.model";
+import { RecoveryPasswordModel } from "../recovery-password.model";
 
 export type CreateUserData = {
   login: string;
@@ -6,4 +7,5 @@ export type CreateUserData = {
   email: string;
   createdAt: string;
   emailConfirmation: EmailConfirmationModel;
+  passwordRecovery: RecoveryPasswordModel;
 };

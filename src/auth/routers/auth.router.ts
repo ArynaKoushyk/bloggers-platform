@@ -7,10 +7,14 @@ import { registrationConfirmationValidation } from "../validation/registration-c
 import { registrationEmailValidation } from "../validation/registration-email-resending.input.validation";
 import { refreshTokenGuardMiddleware } from "../middlewares/refresh-token.guard-middleware";
 import { authController } from "../../core/composition/composition-root";
+import { apiRateLimitMiddleware } from "../../request-logs/middlewares/api-rate-limit.middleware";
+import { passwordRecoveryInputValidation } from "../validation/password-recovery.input.validation";
+import { newPasswordRecoveryInputValidation } from "../validation/new-password-recovery.input.validation";
 export const authRouter = Router({});
 
 authRouter.post(
   "/login",
+  apiRateLimitMiddleware,
   loginInputValidation,
   inputValidationResultMiddleware,
   authController.loginHandler.bind(authController),
@@ -32,6 +36,7 @@ authRouter.get("/me", bearerAuthGuardMiddleware, authController.meHandler.bind(a
 
 authRouter.post(
   "/registration-confirmation",
+  apiRateLimitMiddleware,
   registrationConfirmationValidation,
   inputValidationResultMiddleware,
   authController.registrationConfirmationHandler.bind(authController),
@@ -39,6 +44,7 @@ authRouter.post(
 
 authRouter.post(
   "/registration",
+  apiRateLimitMiddleware,
   registrationInputValidation,
   inputValidationResultMiddleware,
   authController.registrationHandler.bind(authController),
@@ -46,7 +52,24 @@ authRouter.post(
 
 authRouter.post(
   "/registration-email-resending",
+  apiRateLimitMiddleware,
   registrationEmailValidation,
   inputValidationResultMiddleware,
   authController.registrationEmailResendingHandler.bind(authController),
+);
+
+authRouter.post(
+  "/password-recovery",
+  apiRateLimitMiddleware,
+  passwordRecoveryInputValidation,
+  inputValidationResultMiddleware,
+  authController.sendPasswordRecoveryEmailHandler.bind(authController),
+);
+
+authRouter.post(
+  "/new-password",
+  apiRateLimitMiddleware,
+  newPasswordRecoveryInputValidation,
+  inputValidationResultMiddleware,
+  authController.resetPasswordWithRecoveryCodeHandler.bind(authController),
 );

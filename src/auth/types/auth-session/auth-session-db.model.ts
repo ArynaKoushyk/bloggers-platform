@@ -1,7 +1,7 @@
-export type RefreshSessionEntity = {
+export type AuthSessionDbModel = {
   userId: string;
   deviceId: string;
-  deviceName: string; //user-agent
+  deviceName: string;
   ip: string;
   isActive: boolean;
   refreshToken: {

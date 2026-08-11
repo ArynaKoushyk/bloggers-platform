@@ -28,3 +28,6 @@ export class BlogsService implements IBlogsService {
        @inject(DeleteBlogWithPostsUseCase)
        private deleteBlogWithPostsUseCase: DeleteBlogWithPostsUseCase,
      ) {}
+
+
+     обьяснить индексы

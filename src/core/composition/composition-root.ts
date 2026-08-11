@@ -28,9 +28,11 @@ import { BcryptPasswordHashAdapter } from "../../auth/adapters/bcrypt-password-h
 import { UsersController } from "../../users/controllers/users.controller";
 import { JwtAdapter } from "../../auth/adapters/jwt.adapter";
 import { NodemailerAdapter } from "../../auth/adapters/nodemailer.adapter";
-import { MongoRefreshSessionRepository } from "../../auth/repositories/mongo-refresh-session.repository";
 import { AuthService } from "../../auth/applications/auth.service";
 import { AuthController } from "../../auth/controllers/auth.controller";
+import { SecurityDevicesController } from "../../auth/controllers/security-devices.controller";
+import { GetSecurityDevicesQueryHandler } from "../../auth/queries/get-security-devices.query-handler";
+import { MongoAuthSessionQueryRepository } from "../../auth/repositories/mongo-auth-session.query-repository";
 import { Container } from "inversify";
 import {
   BLOGS_QUERY_REPOSITORY,
@@ -48,8 +50,10 @@ import {
   USERS_SERVICE,
   JWT_SERVICE,
   EMAIL_SERVICE,
-  REFRESH_SESSION_REPOSITORY,
+  AUTH_SESSION_REPOSITORY,
+  AUTH_SESSION_QUERY_REPOSITORY,
   AUTH_SERVICE,
+  API_REQUEST_LOG_REPOSITORY,
 } from "./di-tokens";
 import { IBlogsQueryRepository } from "../../blogs/interfaces/blogs.query.repository-interface";
 import { IBlogsRepository } from "../../blogs/interfaces/blogs.repository-interface";
@@ -66,8 +70,12 @@ import { IUsersService } from "../../users/applications/interfaces/users.service
 import { IPasswordHashService } from "../../auth/interfaces/password-hash.service-interface";
 import { IJwtService } from "../../auth/interfaces/jwt.service-interface";
 import { IEmailService } from "../../auth/interfaces/email.service-interface";
-import { IRefreshSessionRepository } from "../../auth/interfaces/refresh-session.repository-interface";
+import { IAuthSessionRepository } from "../../auth/interfaces/auth-session.repository-interface";
+import { IAuthSessionQueryRepository } from "../../auth/interfaces/auth-session.query-repository-interface";
 import { IAuthService } from "../../auth/interfaces/auth.service-interface";
+import { MongoAuthSessionRepository } from "../../auth/repositories/mongo-auth-session.repository";
+import { IApiRequestLogRepository } from "../../request-logs/interfaces/api-request-log.repository-interface";
+import { MongoApiRequestLogRepository } from "../../request-logs/repositories/mongo-api-request-log.repository";
 
 const container: Container = new Container();
 
@@ -127,19 +135,31 @@ container.bind<IJwtService>(JWT_SERVICE).to(JwtAdapter).inSingletonScope();
 container.bind<IEmailService>(EMAIL_SERVICE).to(NodemailerAdapter).inSingletonScope();
 
 container
-  .bind<IRefreshSessionRepository>(REFRESH_SESSION_REPOSITORY)
-  .to(MongoRefreshSessionRepository)
+  .bind<IAuthSessionRepository>(AUTH_SESSION_REPOSITORY)
+  .to(MongoAuthSessionRepository)
+  .inSingletonScope();
+container
+  .bind<IAuthSessionQueryRepository>(AUTH_SESSION_QUERY_REPOSITORY)
+  .to(MongoAuthSessionQueryRepository)
   .inSingletonScope();
 container.bind<IAuthService>(AUTH_SERVICE).to(AuthService).inSingletonScope();
+container.bind(GetSecurityDevicesQueryHandler).toSelf().inSingletonScope();
 container.bind(AuthController).toSelf().inSingletonScope();
+container.bind(SecurityDevicesController).toSelf().inSingletonScope();
+container
+  .bind<IApiRequestLogRepository>(API_REQUEST_LOG_REPOSITORY)
+  .to(MongoApiRequestLogRepository)
+  .inSingletonScope();
 
 export const blogsController = container.get(BlogsController);
 export const postsController = container.get(PostsController);
 export const commentsController = container.get(CommentsController);
 export const authController = container.get(AuthController);
+export const securityDevicesController = container.get(SecurityDevicesController);
 export const usersController = container.get(UsersController);
 export const usersRepository = container.get<IUsersRepository>(USERS_REPOSITORY);
 export const jwtService = container.get<IJwtService>(JWT_SERVICE);
-export const refreshSessionRepository = container.get<IRefreshSessionRepository>(
-  REFRESH_SESSION_REPOSITORY,
+export const authSessionRepository = container.get<IAuthSessionRepository>(AUTH_SESSION_REPOSITORY);
+export const apiRequestLogRepository = container.get<IApiRequestLogRepository>(
+  API_REQUEST_LOG_REPOSITORY,
 );

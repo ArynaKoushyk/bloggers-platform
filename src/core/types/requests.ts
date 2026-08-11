@@ -1,13 +1,12 @@
 import { Request } from "express";
 import { IdType } from "./id";
 import { AuthUserType } from "../../auth/types/auth-user.type";
-import { RefreshTokenPayloadType } from "../../auth/types/refresh-session/refresh-token-payload.type";
+import { RefreshTokenPayloadType } from "../../auth/types/auth-session/refresh-token-payload.type";
 
 declare global {
   namespace Express {
     interface Request {
       user?: AuthUserType;
-      refreshToken?: string;
       refreshTokenPayload?: RefreshTokenPayloadType;
     }
   }
