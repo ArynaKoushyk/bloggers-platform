@@ -7,7 +7,6 @@ import { RegistrationEmailResendingInputDto } from "../dto/registration-email-re
 import { RefreshTokenSuccessViewModel } from "../types/auth-session/refresh-token-success-view-model";
 import { RefreshTokenPayloadType } from "../types/auth-session/refresh-token-payload.type";
 import { DeviceInfo } from "../types/device.info-type";
-import { SecurityDeviceViewModel } from "../types/auth-session/security-device-view-model";
 import { PasswordRecoveryInputDto } from "../dto/password-recovery.input.dto";
 import { NewPasswordRecoveryInputDto } from "../dto/new-password-recovery.input.dto";
 

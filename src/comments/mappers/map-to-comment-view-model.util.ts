@@ -1,12 +1,12 @@
 import { WithId } from "mongodb";
-import { CommentDbModel } from "../types/comment-db.model";
+import { CommentDbType } from "../types/comment-db.model";
 import { CommentViewModel } from "../types/comment-view-model";
 
-export function mapToCommentViewModel(comment: WithId<CommentDbModel>): CommentViewModel {
+export function mapToCommentViewModel(comment: WithId<CommentDbType>): CommentViewModel {
   return {
     id: comment._id.toString(),
     content: comment.content,
     commentatorInfo: comment.commentatorInfo,
-    createdAt: comment.createdAt,
+    createdAt: comment.createdAt.toString(),
   };
 }

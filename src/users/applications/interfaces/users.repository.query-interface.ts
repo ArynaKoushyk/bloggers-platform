@@ -1,11 +1,11 @@
 import { WithId } from "mongodb";
 import { UserQueryInput } from "../../types/user-query.input";
-import { UserDbModel } from "../../types/user-db.model";
+import { UserDbType } from "../../types/user-db.model";
 
 export interface IUsersQueryRepository {
   findAllUsers(
     query: UserQueryInput,
-  ): Promise<{ items: WithId<UserDbModel>[]; totalCount: number }>;
+  ): Promise<{ items: WithId<UserDbType>[]; totalCount: number }>;
 
-  findUserById(id: string): Promise<WithId<UserDbModel> | null>;
+  findUserById(id: string): Promise<WithId<UserDbType> | null>;
 }

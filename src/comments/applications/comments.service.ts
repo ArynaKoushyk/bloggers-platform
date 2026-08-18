@@ -5,12 +5,12 @@ import { CreateCommentInputDto } from "../dto/create-comment.input.dto";
 import { AuthUserType } from "../../auth/types/auth-user.type";
 import { CreateCommentData } from "../types/data/create-comment.data";
 import { UpdateCommentInputDto } from "../dto/update-comment.input.dto";
-import { UpdateCommentData } from "../types/data/update-comment.data";
 import { ICommentsRepository } from "../interfaces/comments.repository-interfaces";
 import { ICommentsService } from "../interfaces/comments.service-interfaces";
 import { IPostsRepository } from "../../posts/interfaces/posts.repository-interface";
 import { inject, injectable } from "inversify";
 import { COMMENTS_REPOSITORY, POSTS_REPOSITORY } from "../../core/composition/di-tokens";
+import { CommentModel } from "../infrastructure/persistence/mongoose/comment.model";
 
 @injectable()
 export class CommentsService implements ICommentsService {
@@ -51,31 +51,28 @@ export class CommentsService implements ICommentsService {
     }
 
     const createData: CreateCommentData = {
-      postId: post.id,
+      postId,
       content,
       commentatorInfo: {
         userId: user.id,
         userLogin: user.login,
       },
-      createdAt: new Date().toISOString(),
     };
-
-    const commentId = await this.commentsRepository.createComment(createData);
+    const createdComment = CommentModel.createComment(createData);
+    await this.commentsRepository.save(createdComment);
 
     return {
       status: ResultStatus.Success,
-      data: commentId,
+      data: createdComment._id.toString(),
       errorsMessages: null,
     };
   }
-  //!!
+
   async updateComment(
     commentId: string,
     dto: UpdateCommentInputDto,
     userId: string,
   ): Promise<Result<null>> {
-    const { content } = dto;
-
     const comment = await this.commentsRepository.findCommentById(commentId);
     if (!comment) {
       return {
@@ -85,25 +82,17 @@ export class CommentsService implements ICommentsService {
       };
     }
 
-    if (userId !== comment.commentatorInfo.userId) {
+    const isUpdated = comment.updateComment(userId, dto);
+
+    if (!isUpdated) {
       return {
         status: ResultStatus.Forbidden,
         data: null,
         errorsMessages: null,
       };
     }
-    const updateData: UpdateCommentData = {
-      content,
-    };
+    await this.commentsRepository.save(comment);
 
-    const isUpdated = await this.commentsRepository.updateComment(commentId, updateData);
-    if (!isUpdated) {
-      return {
-        status: ResultStatus.NotFound,
-        data: null,
-        errorsMessages: null,
-      };
-    }
     return {
       status: ResultStatus.Success,
       data: null,

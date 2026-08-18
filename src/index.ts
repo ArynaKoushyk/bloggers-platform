@@ -1,7 +1,7 @@
 import express from "express";
 import { setupApp } from "./setup-app";
 import { SETTINGS } from "./core/settings/settings";
-import { runDb } from "./db/mongo.db";
+import { runDb } from "./infrastructure/database/mongoose.connection";
 
 const bootstrap = async () => {
   const app = express();
@@ -11,7 +11,8 @@ const bootstrap = async () => {
   console.log("PORT:", SETTINGS.PORT);
   console.log("MONGO_URL:", SETTINGS.MONGO_URL);
   console.log("DB_NAME:", SETTINGS.DB_NAME);
-  await runDb(SETTINGS.MONGO_URL);
+
+  await runDb();
 
   app.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}`);

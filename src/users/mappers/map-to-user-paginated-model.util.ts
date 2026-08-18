@@ -1,11 +1,11 @@
 import { WithId } from "mongodb";
 import { PaginatedViewModel } from "../../core/types/paginated-view.model";
-import { UserDbModel } from "../types/user-db.model";
+import { UserDbType } from "../types/user-db.model";
 import { UserViewModel } from "../types/user-view-model";
 import { mapToUserViewModel } from "./map-to-user-view-model.util";
 
 export function mapToPaginatedUserViewModel(
-  data: PaginatedViewModel<WithId<UserDbModel>>,
+  data: PaginatedViewModel<WithId<UserDbType>>,
 ): PaginatedViewModel<UserViewModel> {
   return {
     pagesCount: data.pagesCount,

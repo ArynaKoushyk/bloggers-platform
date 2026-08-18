@@ -3,6 +3,5 @@ export type CreatePostData = {
   shortDescription: string;
   content: string;
   blogId: string;
-  blogName: string;
-  createdAt: string;
+    blogName: string;
 };

@@ -2,7 +2,6 @@ import { LoginInputDto } from "../dto/login.input.dto";
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { LoginSuccessViewModel } from "../types/login-success-view-model";
-import { UserEntity } from "../../users/types/domain/user-entity.model";
 import { add } from "date-fns";
 import { RefreshTokenPayloadType } from "../types/auth-session/refresh-token-payload.type";
 import { CreateAuthSessionData } from "../types/auth-session/data/create-auth-session.data";
@@ -15,7 +14,6 @@ import { RefreshTokenSuccessViewModel } from "../types/auth-session/refresh-toke
 import { RotateRefreshTokenData } from "../types/auth-session/data/rotate-refresh-token.data";
 import { JwtPayloadType } from "../types/jwt-payload.type";
 import { RegistrationInputDto } from "../dto/registration.input.dto";
-import { CreateUserData } from "../../users/types/data/create-user.data";
 import { emailTemplates } from "../adapters/email-templates";
 import { RegistrationConfirmationInputDto } from "../dto/registration-confirmation.input.dto";
 import { RegistrationEmailResendingInputDto } from "../dto/registration-email-resending.input.dto";
@@ -32,9 +30,17 @@ import {
 import { DeviceInfo } from "../types/device.info-type";
 import { PasswordRecoveryInputDto } from "../dto/password-recovery.input.dto";
 import { NewPasswordRecoveryInputDto } from "../dto/new-password-recovery.input.dto";
-const AUTH_SESSION_LIFETIME_SECONDS = 20;
+import { AuthSessionModel } from "../infrastructure/persistence/mongoose/auth-session.model";
+import {
+  UserDocument,
+  UserModel,
+} from "../../users/infrastructure/persistence/mongoose/user.model";
+import { RegisterUserData } from "../../users/types/data/register-user.data";
+import { InvalidateAuthSessionError } from "../types/auth-session/domain/auth-session.domain-result";
+import { ConfirmEmailError } from "../../users/types/domain/confirm-email.domain-result";
+import { SETTINGS } from "../../core/settings/settings";
+
 @injectable()
-//!! поговорить про black и white list
 export class AuthService implements IAuthService {
   constructor(
     @inject(USERS_REPOSITORY) private usersRepository: IUsersRepository,
@@ -47,7 +53,7 @@ export class AuthService implements IAuthService {
   private findUserWithValidCredentials = async (
     loginOrEmail: string,
     password: string,
-  ): Promise<UserEntity | null> => {
+  ): Promise<UserDocument | null> => {
     const userByLoginOrEmail = await this.usersRepository.findUserByLoginOrEmail(loginOrEmail);
     if (!userByLoginOrEmail) {
       return null;
@@ -88,7 +94,7 @@ export class AuthService implements IAuthService {
     const refreshToken = await this.jwtService.createRefreshToken(refreshTokenPayload);
     const refreshTokenIssuedAt = new Date();
     const refreshTokenExpiresAt = add(refreshTokenIssuedAt, {
-      seconds: AUTH_SESSION_LIFETIME_SECONDS,
+      seconds: SETTINGS.REFRESH_TOKEN_LIFETIME_SECONDS,
     });
 
     const newAuthSessionData: CreateAuthSessionData = {
@@ -96,15 +102,14 @@ export class AuthService implements IAuthService {
       deviceId: refreshTokenPayload.deviceId,
       deviceName: deviceInfo.deviceName,
       ip: deviceInfo.ip,
-      isActive: true,
       refreshToken: {
         id: refreshTokenPayload.jti,
         issuedAt: refreshTokenIssuedAt,
         expiresAt: refreshTokenExpiresAt,
       },
     };
-
-    await this.authSessionRepository.createAuthSession(newAuthSessionData);
+    const session = AuthSessionModel.createSession(newAuthSessionData);
+    await this.authSessionRepository.save(session);
 
     return {
       status: ResultStatus.Success,
@@ -118,34 +123,48 @@ export class AuthService implements IAuthService {
   ): Promise<Result<RefreshTokenSuccessViewModel>> {
     const newRefreshTokenIssuedAt = new Date();
     const newRefreshTokenExpiresAt = add(newRefreshTokenIssuedAt, {
-      seconds: AUTH_SESSION_LIFETIME_SECONDS,
+      seconds: SETTINGS.REFRESH_TOKEN_LIFETIME_SECONDS,
     });
 
-    const refreshTokenRotationData: RotateRefreshTokenData = {
-      refreshToken: {
-        id: randomUUID(),
-        issuedAt: newRefreshTokenIssuedAt,
-        expiresAt: newRefreshTokenExpiresAt,
-      },
-    };
-    const isRefreshTokenRotated = await this.authSessionRepository.rotateRefreshToken(
+    const session = await this.authSessionRepository.findAuthSessionByDeviceId(
       currentRefreshTokenPayload.deviceId,
-      currentRefreshTokenPayload.jti,
-      refreshTokenRotationData,
     );
-    if (!isRefreshTokenRotated) {
+
+    if (!session || !session.isOwner(currentRefreshTokenPayload.userId)) {
       return {
         status: ResultStatus.Unauthorized,
         data: null,
         errorsMessages: null,
       };
     }
+    const currentDate = new Date();
+    const refreshTokenData: RotateRefreshTokenData = {
+      refreshToken: {
+        id: randomUUID(),
+        issuedAt: newRefreshTokenIssuedAt,
+        expiresAt: newRefreshTokenExpiresAt,
+      },
+    };
+    const rotationResult = session.rotateRefreshToken(
+      currentRefreshTokenPayload.jti,
+      currentDate,
+      refreshTokenData,
+    );
+    if (!rotationResult.success) {
+      return {
+        status: ResultStatus.Unauthorized,
+        data: null,
+        errorsMessages: null,
+      };
+    }
+    await this.authSessionRepository.save(session);
+
     const newAccessTokenPayload: JwtPayloadType = {
       userId: currentRefreshTokenPayload.userId,
     };
     const newRefreshTokenPayload: RefreshTokenPayloadType = {
       userId: currentRefreshTokenPayload.userId,
-      jti: refreshTokenRotationData.refreshToken.id,
+      jti: refreshTokenData.refreshToken.id,
       deviceId: currentRefreshTokenPayload.deviceId,
       tokenType: "refresh",
     };
@@ -168,41 +187,49 @@ export class AuthService implements IAuthService {
         errorsMessages: null,
       };
     }
-    if (authSession.userId !== userId) {
-      return {
-        status: ResultStatus.Forbidden,
-        data: null,
-        errorsMessages: null,
-      };
+
+    const invalidateResult = authSession.invalidate(userId);
+
+    if (!invalidateResult.success) {
+      if (invalidateResult.error === InvalidateAuthSessionError.NotOwner) {
+        return {
+          status: ResultStatus.Forbidden,
+          data: null,
+          errorsMessages: null,
+        };
+      } else if (invalidateResult.error === InvalidateAuthSessionError.SessionAlreadyInactive) {
+        return {
+          status: ResultStatus.NotFound,
+          data: null,
+          errorsMessages: null,
+        };
+      }
     }
-    const isAuthSessionInvalidated =
-      await this.authSessionRepository.invalidateAuthSessionByUserIdAndDeviceId(userId, deviceId);
-    if (!isAuthSessionInvalidated) {
-      return {
-        status: ResultStatus.NotFound,
-        data: null,
-        errorsMessages: null,
-      };
-    }
+
+    await this.authSessionRepository.save(authSession);
+
     return {
       status: ResultStatus.Success,
       data: null,
       errorsMessages: null,
     };
   }
+
   async invalidateOtherAuthSessions(
     userId: string,
     currentDeviceId: string,
   ): Promise<Result<null>> {
-    const wereOtherAuthSessionsInvalidated =
-      await this.authSessionRepository.invalidateOtherAuthSessions(userId, currentDeviceId);
-    if (!wereOtherAuthSessionsInvalidated) {
-      return {
-        status: ResultStatus.NotFound,
-        data: null,
-        errorsMessages: null,
-      };
+    const otherSessions = await this.authSessionRepository.findOtherActiveSessions(
+      userId,
+      currentDeviceId,
+    );
+
+    for (const session of otherSessions) {
+      session.invalidate(userId);
     }
+
+    await Promise.all(otherSessions.map((session) => this.authSessionRepository.save(session)));
+
     return {
       status: ResultStatus.Success,
       data: null,
@@ -211,15 +238,31 @@ export class AuthService implements IAuthService {
   }
 
   async logout(userId: string, deviceId: string): Promise<Result<null>> {
-    const isAuthSessionInvalidated =
-      await this.authSessionRepository.invalidateAuthSessionByUserIdAndDeviceId(userId, deviceId);
-    if (!isAuthSessionInvalidated) {
+    const authSession = await this.authSessionRepository.findAuthSessionByDeviceId(deviceId);
+    if (!authSession) {
       return {
         status: ResultStatus.Unauthorized,
         data: null,
         errorsMessages: null,
       };
     }
+    if (authSession.userId !== userId) {
+      return {
+        status: ResultStatus.Forbidden,
+        data: null,
+        errorsMessages: null,
+      };
+    }
+    const invalidateResult = authSession.invalidate(userId);
+
+    if (!invalidateResult.success) {
+      return {
+        status: ResultStatus.Unauthorized,
+        data: null,
+        errorsMessages: null,
+      };
+    }
+    await this.authSessionRepository.save(authSession);
     return {
       status: ResultStatus.Success,
       data: null,
@@ -254,22 +297,15 @@ export class AuthService implements IAuthService {
       minutes: 30,
     });
 
-    const newUser: CreateUserData = {
+    const newUser: RegisterUserData = {
       login,
       email,
       passwordHash: newUserPasswordHash,
-      createdAt: new Date().toISOString(),
-      emailConfirmation: {
-        confirmationCode: emailConfirmationCode,
-        expirationDate: emailConfirmationExpiresAt,
-        isConfirmed: false,
-      },
-      passwordRecovery: {
-        recoveryCode: null,
-        expirationDate: null,
-      },
+      confirmationCode: emailConfirmationCode,
+      confirmationCodeExpirationDate: emailConfirmationExpiresAt,
     };
-    await this.usersRepository.createUser(newUser);
+    const user = UserModel.registerUser(newUser);
+    await this.usersRepository.save(user);
 
     try {
       await this.emailService.sendEmail(
@@ -279,11 +315,6 @@ export class AuthService implements IAuthService {
       );
     } catch (error) {
       console.error(error);
-      return {
-        status: ResultStatus.BadRequest,
-        data: null,
-        errorsMessages: [{ field: "email", message: "Confirmation email could not be sent" }],
-      };
     }
 
     return {
@@ -295,9 +326,8 @@ export class AuthService implements IAuthService {
 
   async confirmRegistration(dto: RegistrationConfirmationInputDto): Promise<Result<null>> {
     const { code } = dto;
-    const userWithConfirmationCode =
-      await this.usersRepository.findUserByEmailConfirmationCode(code);
-    if (!userWithConfirmationCode) {
+    const user = await this.usersRepository.findUserByEmailConfirmationCode(code);
+    if (!user) {
       return {
         status: ResultStatus.BadRequest,
         data: null,
@@ -305,58 +335,71 @@ export class AuthService implements IAuthService {
       };
     }
 
-    if (userWithConfirmationCode.emailConfirmation.isConfirmed === true) {
+    const currentDate = new Date();
+    const result = user.confirmEmail(code, currentDate);
+
+    if (!result.success) {
+      if (result.error === ConfirmEmailError.AlreadyConfirmed) {
+        return {
+          status: ResultStatus.BadRequest,
+          data: null,
+          errorsMessages: [{ field: "code", message: "Email is already confirmed" }],
+        };
+      }
+
+      if (result.error === ConfirmEmailError.InvalidCode) {
+        return {
+          status: ResultStatus.BadRequest,
+          data: null,
+          errorsMessages: [{ field: "code", message: "Confirmation code is incorrect" }],
+        };
+      }
+
+      if (result.error === ConfirmEmailError.ExpiredCode) {
+        return {
+          status: ResultStatus.BadRequest,
+          data: null,
+          errorsMessages: [{ field: "code", message: "Confirmation code is expired" }],
+        };
+      }
+
       return {
         status: ResultStatus.BadRequest,
         data: null,
-        errorsMessages: [{ field: "code", message: "Confirmation code has already been applied" }],
+        errorsMessages: [{ field: "code", message: "Confirmation code is invalid" }],
       };
     }
 
-    if (
-      !userWithConfirmationCode.emailConfirmation.expirationDate ||
-      userWithConfirmationCode.emailConfirmation.expirationDate < new Date()
-    ) {
-      return {
-        status: ResultStatus.BadRequest,
-        data: null,
-        errorsMessages: [{ field: "code", message: "Confirmation code is expired" }],
-      };
-    }
-
-    const isUserEmailConfirmed = await this.usersRepository.markUserEmailAsConfirmed(
-      userWithConfirmationCode.id,
-    );
-    if (isUserEmailConfirmed) {
-      return {
-        status: ResultStatus.Success,
-        data: null,
-        errorsMessages: null,
-      };
-    } else {
-      return {
-        status: ResultStatus.BadRequest,
-        data: null,
-        errorsMessages: [
-          {
-            field: "code",
-            message: "Confirmation code could not be applied",
-          },
-        ],
-      };
-    }
+    await this.usersRepository.save(user);
+    return {
+      status: ResultStatus.Success,
+      data: null,
+      errorsMessages: null,
+    };
   }
+
   async resendRegistrationEmail(dto: RegistrationEmailResendingInputDto): Promise<Result<null>> {
     const { email } = dto;
-    const userByEmail = await this.usersRepository.findUserByEmail(email);
-    if (!userByEmail) {
+    const user = await this.usersRepository.findUserByEmail(email);
+    if (!user) {
       return {
         status: ResultStatus.BadRequest,
         data: null,
         errorsMessages: [{ field: "email", message: "Email is not registered" }],
       };
     }
-    if (userByEmail.emailConfirmation.isConfirmed === true) {
+    const newEmailConfirmationCode = randomUUID();
+    const newEmailConfirmationExpiresAt = add(new Date(), {
+      hours: 1,
+      minutes: 30,
+    });
+
+    const isUpdated = user.updateEmailConfirmationCode(
+      newEmailConfirmationCode,
+      newEmailConfirmationExpiresAt,
+    );
+
+    if (!isUpdated) {
       return {
         status: ResultStatus.BadRequest,
         data: null,
@@ -364,45 +407,21 @@ export class AuthService implements IAuthService {
       };
     }
 
-    const newEmailConfirmationCode = randomUUID();
-    const newEmailConfirmationExpiresAt = add(new Date(), {
-      hours: 1,
-      minutes: 30,
-    });
+    await this.usersRepository.save(user);
 
-    const isEmailConfirmationCodeSaved = await this.usersRepository.saveEmailConfirmationCode(
-      userByEmail.id,
-      {
-        confirmationCode: newEmailConfirmationCode,
-        expirationDate: newEmailConfirmationExpiresAt,
-      },
-    );
-
-    if (isEmailConfirmationCodeSaved) {
-      try {
-        await this.emailService.sendEmail(
-          email,
-          newEmailConfirmationCode,
-          emailTemplates.registrationEmail,
-        );
-      } catch (error) {
-        console.error(error);
-      }
-      return {
-        status: ResultStatus.Success,
-        data: null,
-        errorsMessages: null,
-      };
+    try {
+      await this.emailService.sendEmail(
+        email,
+        newEmailConfirmationCode,
+        emailTemplates.registrationEmail,
+      );
+    } catch (error) {
+      console.error(error);
     }
     return {
-      status: ResultStatus.BadRequest,
+      status: ResultStatus.Success,
       data: null,
-      errorsMessages: [
-        {
-          field: "email",
-          message: "Confirmation email could not be resent",
-        },
-      ],
+      errorsMessages: null,
     };
   }
 
@@ -423,32 +442,17 @@ export class AuthService implements IAuthService {
       minutes: 30,
     });
 
-    const isPasswordRecoveryCodeSaved = await this.usersRepository.savePasswordRecoveryCode(
-      userByEmail.id,
-      {
-        recoveryCode,
-        expirationDate: recoveryCodeExpiresAt,
-      },
-    );
+    userByEmail.setPasswordRecoveryCode(recoveryCode, recoveryCodeExpiresAt);
 
-    if (isPasswordRecoveryCodeSaved) {
-      try {
-        await this.emailService.sendEmail(
-          email,
-          recoveryCode,
-          emailTemplates.passwordRecoveryEmail,
-        );
-      } catch (error) {
-        console.error(error);
-      }
-      return {
-        status: ResultStatus.Success,
-        data: null,
-        errorsMessages: null,
-      };
+    await this.usersRepository.save(userByEmail);
+
+    try {
+      await this.emailService.sendEmail(email, recoveryCode, emailTemplates.passwordRecoveryEmail);
+    } catch (error) {
+      console.error(error);
     }
     return {
-      status: ResultStatus.BadRequest,
+      status: ResultStatus.Success,
       data: null,
       errorsMessages: null,
     };
@@ -470,24 +474,15 @@ export class AuthService implements IAuthService {
         ],
       };
     }
-    if (
-      !userWithRecoveryCode.passwordRecovery.expirationDate ||
-      userWithRecoveryCode.passwordRecovery.expirationDate < new Date()
-    ) {
-      return {
-        status: ResultStatus.BadRequest,
-        data: null,
-        errorsMessages: [{ field: "recoveryCode", message: "Recovery code is expired" }],
-      };
-    }
 
     const newPasswordHash = await this.passwordHashService.generateHash(newPassword);
-    const isPasswordReset = await this.usersRepository.resetPasswordAndInvalidateRecoveryCode(
-      userWithRecoveryCode.id,
+    const resetResult = userWithRecoveryCode.resetPassword(
       recoveryCode,
       newPasswordHash,
+      new Date(),
     );
-    if (!isPasswordReset) {
+
+    if (!resetResult.success) {
       return {
         status: ResultStatus.BadRequest,
         data: null,
@@ -499,6 +494,8 @@ export class AuthService implements IAuthService {
         ],
       };
     }
+
+    await this.usersRepository.save(userWithRecoveryCode);
     return {
       status: ResultStatus.Success,
       data: null,

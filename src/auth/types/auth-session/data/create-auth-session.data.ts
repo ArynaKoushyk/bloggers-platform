@@ -3,7 +3,6 @@ export type CreateAuthSessionData = {
   deviceId: string;
   deviceName: string;
   ip: string;
-  isActive: boolean;
   refreshToken: {
     id: string;
     issuedAt: Date;

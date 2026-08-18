@@ -6,7 +6,7 @@ export type UserEntity = {
   login: string;
   passwordHash: string;
   email: string;
-  createdAt: string;
+  createdAt: Date
   emailConfirmation: EmailConfirmationModel;
   passwordRecovery: RecoveryPasswordModel;
 };

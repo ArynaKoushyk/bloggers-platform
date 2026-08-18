@@ -1,8 +1,8 @@
-import { AuthSessionDbModel } from "../types/auth-session/auth-session-db.model";
+import { AuthSessionDbType } from "../types/auth-session/auth-session-db.model";
 import { SecurityDeviceViewModel } from "../types/auth-session/security-device-view-model";
 
 export const mapToSecurityDeviceViewModel = (
-  session: AuthSessionDbModel,
+  session: AuthSessionDbType,
 ): SecurityDeviceViewModel => {
   return {
     ip: session.ip,

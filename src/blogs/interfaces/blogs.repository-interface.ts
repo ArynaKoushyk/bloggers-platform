@@ -1,10 +1,7 @@
-import { CreateBlogData } from "../types/data/create-blog.data";
-import { UpdateBlogData } from "../types/data/update-blog.data";
-import { BlogEntity } from "../types/domain/blog-entity.model";
+import { BlogDocument } from "../infrastructure/persistence/mongoose/blog.model";
 
 export interface IBlogsRepository {
-  findBlogById(id: string): Promise<BlogEntity | null>;
-  createBlog(data: CreateBlogData): Promise<string>;
-  updateBlog(id: string, data: UpdateBlogData): Promise<boolean>;
+  findBlogById(id: string): Promise<BlogDocument | null>;
+  save(blog: BlogDocument): Promise<void>;
   deleteBlog(id: string): Promise<boolean>;
 }

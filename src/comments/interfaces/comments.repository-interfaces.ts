@@ -1,10 +1,7 @@
-import { CreateCommentData } from "../types/data/create-comment.data";
-import { UpdateCommentData } from "../types/data/update-comment.data";
-import { CommentEntity } from "../types/domain/comment-entity.model";
+import { CommentDocument } from "../infrastructure/persistence/mongoose/comment.model";
 
 export interface ICommentsRepository {
-  findCommentById(id: string): Promise<CommentEntity | null>;
-  createComment(data: CreateCommentData): Promise<string>;
-  updateComment(id: string, data: UpdateCommentData): Promise<boolean>;
+  findCommentById(id: string): Promise<CommentDocument | null>;
+  save(comment: CommentDocument): Promise<void>;
   deleteComment(id: string): Promise<boolean>;
 }

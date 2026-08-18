@@ -1,8 +1,8 @@
 import { CommentatorInfo } from "./commentator-info.type";
 
-export type CommentDbModel = {
+export type CommentDbType = {
   postId: string;
   content: string;
   commentatorInfo: CommentatorInfo;
-  createdAt: string;
+  createdAt: Date;
 };

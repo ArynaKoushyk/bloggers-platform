@@ -1,15 +1,8 @@
-import { CreatePostData } from "../types/data/create-post.data";
-import { UpdatePostData } from "../types/data/update-post.data";
-import { PostEntity } from "../types/domain/post-entity.model";
+import { PostDocument } from "../infrastructure/persistence/mongoose/post.model";
 
 export interface IPostsRepository {
-  findPostById(id: string): Promise<PostEntity | null>;
-
-  createPost(data: CreatePostData): Promise<string>;
-
-  updatePost(id: string, data: UpdatePostData): Promise<boolean>;
-
+  findPostById(id: string): Promise<PostDocument | null>;
+  save(post: PostDocument): Promise<void>;
   deletePost(id: string): Promise<boolean>;
-
   deletePostsByBlogId(blogId: string): Promise<void>;
 }

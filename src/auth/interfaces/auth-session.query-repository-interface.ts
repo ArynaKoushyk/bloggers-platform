@@ -1,6 +1,6 @@
 import { WithId } from "mongodb";
-import { AuthSessionDbModel } from "../types/auth-session/auth-session-db.model";
+import { AuthSessionDbType } from "../types/auth-session/auth-session-db.model";
 
 export interface IAuthSessionQueryRepository {
-  findActiveAuthSessionsByUserId(userId: string): Promise<WithId<AuthSessionDbModel>[]>;
+  findActiveAuthSessionsByUserId(userId: string): Promise<WithId<AuthSessionDbType>[]>;
 }

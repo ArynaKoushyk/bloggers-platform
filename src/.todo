@@ -31,3 +31,23 @@ export class BlogsService implements IBlogsService {
 
 
      обьяснить индексы
+
+
+
+
+     СПООСИТЬ ПРО SAVE в MONGOOSE!! find by id and Update 
+       async markUserEmailAsConfirmed(userId: string): Promise<boolean> {
+    const document = await UserModel.findById(userId);
+
+    if (!document) {
+      return false;
+    }
+
+    document.emailConfirmation.isConfirmed = true;
+    document.emailConfirmation.confirmationCode = null;
+    document.emailConfirmation.expirationDate = null;
+
+    await document.save();
+
+    return true;
+  } что лучше вариант через две операции find and save или одним updateOne

@@ -11,6 +11,8 @@ import { IPostsService } from "../interfaces/posts.service-interface";
 import { IPostsRepository } from "../interfaces/posts.repository-interface";
 import { inject, injectable } from "inversify";
 import { BLOGS_REPOSITORY, POSTS_REPOSITORY } from "../../core/composition/di-tokens";
+import { PostModel } from "../infrastructure/persistence/mongoose/post.model";
+
 
 @injectable()
 export class PostsService implements IPostsService {
@@ -35,8 +37,7 @@ export class PostsService implements IPostsService {
   }
 
   async createPost(dto: CreatePostInputDto): Promise<Result<string>> {
-    const { title, shortDescription, content, blogId } = dto;
-    const blog = await this.blogsRepository.findBlogById(blogId);
+    const blog = await this.blogsRepository.findBlogById(dto.blogId);
     if (!blog) {
       return {
         status: ResultStatus.BadRequest,
@@ -45,23 +46,23 @@ export class PostsService implements IPostsService {
       };
     }
     const createData: CreatePostData = {
-      title,
-      shortDescription,
-      content,
-      blogId,
+      title: dto.title,
+      shortDescription: dto.shortDescription,
+      content: dto.content,
+      blogId: dto.blogId,
       blogName: blog.name,
-      createdAt: new Date().toISOString(),
     };
-    const postId = await this.postsRepository.createPost(createData);
+
+    const createdPost = PostModel.createPost(createData);
+    await this.postsRepository.save(createdPost);
     return {
       status: ResultStatus.Success,
-      data: postId,
+      data: createdPost._id.toString(),
       errorsMessages: null,
     };
   }
   async updatePost(id: string, dto: UpdatePostInputDto): Promise<Result<null>> {
-    const { title, shortDescription, content, blogId } = dto;
-    const blog = await this.blogsRepository.findBlogById(blogId);
+    const blog = await this.blogsRepository.findBlogById(dto.blogId);
     if (!blog) {
       return {
         status: ResultStatus.BadRequest,
@@ -70,21 +71,27 @@ export class PostsService implements IPostsService {
       };
     }
 
-    const updateData: UpdatePostData = {
-      title,
-      shortDescription,
-      content,
-      blogId,
-      blogName: blog.name,
-    };
-    const isUpdated = await this.postsRepository.updatePost(id, updateData);
-    if (!isUpdated) {
+    const post = await this.postsRepository.findPostById(id);
+
+    if (!post) {
       return {
         status: ResultStatus.NotFound,
         data: null,
         errorsMessages: null,
       };
     }
+    const updateData: UpdatePostData = {
+      title: dto.title,
+      shortDescription: dto.shortDescription,
+      content: dto.content,
+      blogId: dto.blogId,
+      blogName: blog.name,
+    };
+
+    post.updatePost(updateData);
+
+    await this.postsRepository.save(post);
+
     return {
       status: ResultStatus.Success,
       data: null,
@@ -112,7 +119,6 @@ export class PostsService implements IPostsService {
     return await this.postsRepository.deletePostsByBlogId(blogId);
   }
 
-  //!! использовать репозиторий блогов или сервис ?
   async createPostByBlogId(
     blogId: string,
     dto: CreatePostByBlogIdInputDto,
@@ -132,12 +138,12 @@ export class PostsService implements IPostsService {
       content,
       blogId,
       blogName: blog.name,
-      createdAt: new Date().toISOString(),
     };
-    const postId = await this.postsRepository.createPost(createData);
+    const createdPost = PostModel.createPost(createData);
+    await this.postsRepository.save(createdPost);
     return {
       status: ResultStatus.Success,
-      data: postId,
+      data: createdPost._id.toString(),
       errorsMessages: null,
     };
   }

@@ -5,5 +5,5 @@ export type PostEntity = {
   content: string;
   blogId: string;
   blogName: string;
-  createdAt: string; 
+  createdAt: Date;
 };

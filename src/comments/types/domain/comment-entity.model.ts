@@ -5,5 +5,5 @@ export type CommentEntity = {
   postId: string;
   content: string;
   commentatorInfo: CommentatorInfo;
-  createdAt: string;
+  createdAt: Date;
 };
