@@ -4,7 +4,7 @@ import { config } from "dotenv";
 config();
 
 const REFRESH_TOKEN_COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
-const REFRESH_TOKEN_LIFETIME_SECONDS = 20;
+const REFRESH_TOKEN_LIFETIME_SECONDS = 30 * 24 * 60 * 60;
 
 //!! спросить про dotenv
 export const SETTINGS = {
@@ -12,8 +12,8 @@ export const SETTINGS = {
   MONGO_URL: process.env.MONGO_URL || "mongodb://localhost:27017",
   DB_NAME: process.env.DB_NAME || "bloggers",
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET as string,
-  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string, 
-  JWT_ACCESS_TOKEN_EXPIRES_IN: "10s" as SignOptions["expiresIn"],
+  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
+  JWT_ACCESS_TOKEN_EXPIRES_IN: "1h" as SignOptions["expiresIn"],
   JWT_REFRESH_TOKEN_EXPIRES_IN: REFRESH_TOKEN_LIFETIME_SECONDS,
   REFRESH_TOKEN_LIFETIME_SECONDS,
   REFRESH_TOKEN_COOKIE_NAME: "refreshToken",

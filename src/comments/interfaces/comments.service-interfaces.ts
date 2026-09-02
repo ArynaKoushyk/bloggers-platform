@@ -2,10 +2,10 @@ import { AuthUserType } from "../../auth/types/auth-user.type";
 import { Result } from "../../core/result/result.type";
 import { CreateCommentInputDto } from "../dto/create-comment.input.dto";
 import { UpdateCommentInputDto } from "../dto/update-comment.input.dto";
-import { CommentEntity } from "../types/domain/comment-entity.model";
+import { CommentDocument } from "../infrastructure/persistence/mongoose/comment.model";
 
 export interface ICommentsService {
-  findCommentById(id: string): Promise<Result<CommentEntity>>;
+  findCommentById(id: string): Promise<Result<CommentDocument>>;
   createComment(
     postId: string,
     dto: CreateCommentInputDto,

@@ -1,7 +1,11 @@
 import { ICommentsService } from "../interfaces/comments.service-interfaces";
 import { Response } from "express";
 import { APIErrorResult } from "../../core/result/result.type";
-import { RequestWithParams, RequestWithParamsAndBody } from "../../core/types/requests";
+import {
+  RequestWithParams,
+  RequestWithParamsAndBody,
+  RequestWithParamsAndBodyAndUserId,
+} from "../../core/types/requests";
 import { CreateCommentInputDto } from "../dto/create-comment.input.dto";
 import { CommentViewModel } from "../types/comment-view-model";
 import { ResultStatus } from "../../core/result/resultCode";
@@ -15,6 +19,9 @@ import { GetCommentsByPostIdQueryHandler } from "../queries/get-comments-by-post
 
 import { injectable, inject } from "inversify";
 import { COMMENTS_SERVICE } from "../../core/composition/di-tokens";
+import { LikeStatus } from "../../likes/types/like-status.type";
+import { UpdateCommentLikeStatusUseCase } from "../use-cases/update-comment-like-status.use-case";
+import { UpdateLikeStatusInputDto } from "../../likes/dto/update-like-status.input.dto";
 
 @injectable()
 export class CommentsController {
@@ -23,6 +30,8 @@ export class CommentsController {
     @inject(GetCommentQueryHandler) private getCommentQueryHandler: GetCommentQueryHandler,
     @inject(GetCommentsByPostIdQueryHandler)
     private getCommentsByPostIdQueryHandler: GetCommentsByPostIdQueryHandler,
+    @inject(UpdateCommentLikeStatusUseCase)
+    private updateCommentLikeStatusUseCase: UpdateCommentLikeStatusUseCase,
   ) {}
 
   async createCommentByPostIdHandler(
@@ -67,7 +76,8 @@ export class CommentsController {
     res: Response<CommentViewModel | APIErrorResult>,
   ) {
     const id = req.params.id;
-    const result = await this.getCommentQueryHandler.findCommentById(id);
+    const userId = req.user?.id;
+    const result = await this.getCommentQueryHandler.findCommentById(id, userId);
 
     if (result.status !== ResultStatus.Success) {
       return res.sendStatus(resultCodeToHttpException(result.status));
@@ -81,7 +91,11 @@ export class CommentsController {
   ) {
     const query = getCommentQueryInput(req);
     const postId = req.params.postId;
-    const result = await this.getCommentsByPostIdQueryHandler.findCommentsByPostId(postId, query);
+    const result = await this.getCommentsByPostIdQueryHandler.findCommentsByPostId(
+      postId,
+      query,
+      req.user?.id,
+    );
     if (result.status !== ResultStatus.Success) {
       return res.status(resultCodeToHttpException(result.status)).send({
         errorsMessages: result.errorsMessages,
@@ -100,6 +114,25 @@ export class CommentsController {
     if (!user) return res.sendStatus(HttpStatus.Unauthorized);
 
     const updateResult = await this.commentsService.updateComment(commentId, updateDto, user.id);
+    if (updateResult.status !== ResultStatus.Success) {
+      return res.sendStatus(resultCodeToHttpException(updateResult.status));
+    }
+    return res.sendStatus(HttpStatus.NoContent);
+  }
+
+  async updateCommentLikeStatusHandler(
+    req: RequestWithParamsAndBody<{ commentId: string }, UpdateLikeStatusInputDto>,
+    res: Response,
+  ) {
+    const commentId = req.params.commentId;
+    const updateDto = req.body.likeStatus;
+    const user = req.user;
+    if (!user) return res.sendStatus(HttpStatus.Unauthorized);
+    const updateResult = await this.updateCommentLikeStatusUseCase.execute(
+      commentId,
+      user.id,
+      updateDto,
+    );
     if (updateResult.status !== ResultStatus.Success) {
       return res.sendStatus(resultCodeToHttpException(updateResult.status));
     }

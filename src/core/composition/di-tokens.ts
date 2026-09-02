@@ -18,6 +18,8 @@ import { IPasswordHashService } from "../../auth/interfaces/password-hash.servic
 import { IAuthSessionRepository } from "../../auth/interfaces/auth-session.repository-interface";
 import { IAuthSessionQueryRepository } from "../../auth/interfaces/auth-session.query-repository-interface";
 import { IApiRequestLogRepository } from "../../request-logs/interfaces/api-request-log.repository-interface";
+import { ILikesRepository } from "../../likes/interfaces/likes.repository-interface";
+import { ILikesQueryRepository } from "../../likes/interfaces/likes.query-repository-interface";
 
 export const BLOGS_REPOSITORY: ServiceIdentifier<IBlogsRepository> = Symbol.for("BLOGS_REPOSITORY");
 export const BLOGS_SERVICE: ServiceIdentifier<IBlogsService> = Symbol.for("BLOGS_SERVICE");
@@ -36,6 +38,9 @@ export const COMMENTS_QUERY_REPOSITORY: ServiceIdentifier<ICommentsQueryReposito
   "COMMENTS_QUERY_REPOSITORY",
 );
 
+export const LIKES_REPOSITORY: ServiceIdentifier<ILikesRepository> = Symbol.for("LIKES_REPOSITORY");
+export const LIKES_QUERY_REPOSITORY: ServiceIdentifier<ILikesQueryRepository> =
+  Symbol.for("LIKES_QUERY_REPOSITORY");
 export const USERS_REPOSITORY: ServiceIdentifier<IUsersRepository> = Symbol.for("USERS_REPOSITORY");
 export const USERS_SERVICE: ServiceIdentifier<IUsersService> = Symbol.for("USERS_SERVICE");
 export const USERS_QUERY_REPOSITORY: ServiceIdentifier<IUsersQueryRepository> =

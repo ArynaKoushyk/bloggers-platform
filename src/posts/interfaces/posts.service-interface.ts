@@ -2,10 +2,10 @@ import { Result } from "../../core/result/result.type";
 import { CreatePostByBlogIdInputDto } from "../dto/create-post-by-blog-id.input.dto";
 import { CreatePostInputDto } from "../dto/create-post.input.dto";
 import { UpdatePostInputDto } from "../dto/update-post.input.dto";
-import { PostEntity } from "../types/domain/post-entity.model";
+import { PostDocument } from "../infrastructure/persistence/mongoose/post.model";
 
 export interface IPostsService {
-  findPostById(id: string): Promise<Result<PostEntity>>;
+  findPostById(id: string): Promise<Result<PostDocument>>;
 
   createPost(dto: CreatePostInputDto): Promise<Result<string>>;
 

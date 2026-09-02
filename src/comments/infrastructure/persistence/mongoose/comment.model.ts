@@ -64,6 +64,8 @@ const commentSchema = new Schema<
     postId: { type: String, required: true },
     content: { type: String, required: true, minlength: 1, maxLength: 500 },
     commentatorInfo: { type: commentatorInfoSchema, required: true },
+    likesCount: { type: Number, default: 0 },
+    dislikesCount: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
   },
   { optimisticConcurrency: true },

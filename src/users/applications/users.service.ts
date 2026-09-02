@@ -6,8 +6,7 @@ import { IUsersRepository } from "./interfaces/users.repository-interface";
 import { IUsersService } from "./interfaces/users.service.interface";
 import { inject, injectable } from "inversify";
 import { PASSWORD_HASH_SERVICE, USERS_REPOSITORY } from "../../core/composition/di-tokens";
-import { UserModel } from "../infrastructure/persistence/mongoose/user.model";
-import { UserEntity } from "../types/domain/user-entity.model";
+import { UserDocument, UserModel } from "../infrastructure/persistence/mongoose/user.model";
 
 @injectable()
 export class UsersService implements IUsersService {
@@ -15,7 +14,7 @@ export class UsersService implements IUsersService {
     @inject(USERS_REPOSITORY) private usersRepository: IUsersRepository,
     @inject(PASSWORD_HASH_SERVICE) private passwordHashService: IPasswordHashService,
   ) {}
-  async findUserById(id: string): Promise<Result<UserEntity>> {
+  async findUserById(id: string): Promise<Result<UserDocument>> {
     const user = await this.usersRepository.findUserById(id);
 
     if (!user) {

@@ -1,6 +1,5 @@
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
-import { CommentEntity } from "../types/domain/comment-entity.model";
 import { CreateCommentInputDto } from "../dto/create-comment.input.dto";
 import { AuthUserType } from "../../auth/types/auth-user.type";
 import { CreateCommentData } from "../types/data/create-comment.data";
@@ -10,7 +9,10 @@ import { ICommentsService } from "../interfaces/comments.service-interfaces";
 import { IPostsRepository } from "../../posts/interfaces/posts.repository-interface";
 import { inject, injectable } from "inversify";
 import { COMMENTS_REPOSITORY, POSTS_REPOSITORY } from "../../core/composition/di-tokens";
-import { CommentModel } from "../infrastructure/persistence/mongoose/comment.model";
+import {
+  CommentDocument,
+  CommentModel,
+} from "../infrastructure/persistence/mongoose/comment.model";
 
 @injectable()
 export class CommentsService implements ICommentsService {
@@ -18,7 +20,7 @@ export class CommentsService implements ICommentsService {
     @inject(COMMENTS_REPOSITORY) private commentsRepository: ICommentsRepository,
     @inject(POSTS_REPOSITORY) private postsRepository: IPostsRepository,
   ) {}
-  async findCommentById(id: string): Promise<Result<CommentEntity>> {
+  async findCommentById(id: string): Promise<Result<CommentDocument>> {
     const comment = await this.commentsRepository.findCommentById(id);
     if (!comment) {
       return {

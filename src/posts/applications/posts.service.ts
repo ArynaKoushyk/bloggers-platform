@@ -1,6 +1,5 @@
 import { ResultStatus } from "../../core/result/resultCode";
 import { Result } from "../../core/result/result.type";
-import { PostEntity } from "../types/domain/post-entity.model";
 import { CreatePostInputDto } from "../dto/create-post.input.dto";
 import { UpdatePostInputDto } from "../dto/update-post.input.dto";
 import { CreatePostData } from "../types/data/create-post.data";
@@ -11,8 +10,7 @@ import { IPostsService } from "../interfaces/posts.service-interface";
 import { IPostsRepository } from "../interfaces/posts.repository-interface";
 import { inject, injectable } from "inversify";
 import { BLOGS_REPOSITORY, POSTS_REPOSITORY } from "../../core/composition/di-tokens";
-import { PostModel } from "../infrastructure/persistence/mongoose/post.model";
-
+import { PostDocument, PostModel } from "../infrastructure/persistence/mongoose/post.model";
 
 @injectable()
 export class PostsService implements IPostsService {
@@ -20,7 +18,7 @@ export class PostsService implements IPostsService {
     @inject(POSTS_REPOSITORY) private postsRepository: IPostsRepository,
     @inject(BLOGS_REPOSITORY) private blogsRepository: IBlogsRepository,
   ) {}
-  async findPostById(id: string): Promise<Result<PostEntity>> {
+  async findPostById(id: string): Promise<Result<PostDocument>> {
     const post = await this.postsRepository.findPostById(id);
     if (!post) {
       return {

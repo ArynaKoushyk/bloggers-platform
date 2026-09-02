@@ -11,6 +11,7 @@ import { GetCommentsByPostIdQueryHandler } from "../../comments/queries/get-comm
 import { MongoCommentsQueryRepository } from "../../comments/infrastructure/persistence/mongoose/mongoose-comments.query-repository";
 import { MongoCommentsRepository } from "../../comments/infrastructure/persistence/mongoose/mongoose-comments.repository";
 import { CommentsController } from "../../comments/controllers/comments.controller";
+import { UpdateCommentLikeStatusUseCase } from "../../comments/use-cases/update-comment-like-status.use-case";
 import { PostsService } from "../../posts/applications/posts.service";
 import { PostsController } from "../../posts/controllers/posts.controller";
 import { GetPostQueryHandler } from "../../posts/queries/get-post.query-handler";
@@ -53,6 +54,8 @@ import {
   AUTH_SESSION_QUERY_REPOSITORY,
   AUTH_SERVICE,
   API_REQUEST_LOG_REPOSITORY,
+  LIKES_REPOSITORY,
+  LIKES_QUERY_REPOSITORY,
 } from "./di-tokens";
 import { IBlogsQueryRepository } from "../../blogs/interfaces/blogs.query.repository-interface";
 import { IBlogsRepository } from "../../blogs/interfaces/blogs.repository-interface";
@@ -76,6 +79,10 @@ import { MongoAuthSessionRepository } from "../../auth/infrastructure/persistenc
 import { IApiRequestLogRepository } from "../../request-logs/interfaces/api-request-log.repository-interface";
 import { MongoApiRequestLogRepository } from "../../request-logs/infrastructure/persistence/mongoose/mongoose-api-request-log.repository";
 import { MongoBlogsRepository } from "../../blogs/infrastructure/persistence/mongoose/mongoose-blogs.repository";
+import { ILikesRepository } from "../../likes/interfaces/likes.repository-interface";
+import { MongoLikesRepository } from "../../likes/infrastructure/persistence/mongoose/mongoose-likes.repository";
+import { ILikesQueryRepository } from "../../likes/interfaces/likes.query-repository-interface";
+import { MongoLikesQueryRepository } from "../../likes/infrastructure/persistence/mongoose/mongoose-likes.query-repository";
 
 const container: Container = new Container();
 
@@ -131,6 +138,12 @@ container.bind(GetUserQueryHandler).toSelf().inSingletonScope();
 container.bind(GetUsersListQueryHandler).toSelf().inSingletonScope();
 container.bind(UsersController).to(UsersController).inSingletonScope();
 
+container.bind<ILikesRepository>(LIKES_REPOSITORY).to(MongoLikesRepository).inSingletonScope();
+container
+  .bind<ILikesQueryRepository>(LIKES_QUERY_REPOSITORY)
+  .to(MongoLikesQueryRepository)
+  .inSingletonScope();
+container.bind(UpdateCommentLikeStatusUseCase).toSelf().inSingletonScope();
 container.bind<IJwtService>(JWT_SERVICE).to(JwtAdapter).inSingletonScope();
 container.bind<IEmailService>(EMAIL_SERVICE).to(NodemailerAdapter).inSingletonScope();
 

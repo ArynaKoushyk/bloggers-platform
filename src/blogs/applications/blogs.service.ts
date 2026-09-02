@@ -1,17 +1,16 @@
 import { Result } from "../../core/result/result.type";
 import { ResultStatus } from "../../core/result/resultCode";
 import { IBlogsRepository } from "../interfaces/blogs.repository-interface";
-import { BlogEntity } from "../types/domain/blog-entity.model";
 import { CreateBlogInputDto } from "../dto/create-blog.input.dto";
 import { UpdateBlogInputDto } from "../dto/update-blog.input.dto";
 import { IBlogsService } from "../interfaces/blogs.service-interface";
 import { inject, injectable } from "inversify";
 import { BLOGS_REPOSITORY } from "../../core/composition/di-tokens";
-import { BlogModel } from "../infrastructure/persistence/mongoose/blog.model";
+import { BlogDocument, BlogModel } from "../infrastructure/persistence/mongoose/blog.model";
 @injectable()
 export class BlogsService implements IBlogsService {
   constructor(@inject(BLOGS_REPOSITORY) private blogsRepository: IBlogsRepository) {}
-  async findBlogById(id: string): Promise<Result<BlogEntity>> {
+  async findBlogById(id: string): Promise<Result<BlogDocument>> {
     const blog = await this.blogsRepository.findBlogById(id);
     if (!blog) {
       return {

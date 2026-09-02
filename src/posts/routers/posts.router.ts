@@ -9,6 +9,7 @@ import { bearerAuthGuardMiddleware } from "../../auth/middlewares/bearer-auth.gu
 import { commentQueryValidation } from "../../comments/validation/comment-query.validation";
 import { createCommentInputValidation } from "../../comments/validation/create-comment.input.validation";
 import { commentsController, postsController } from "../../core/composition/composition-root";
+import { optionalAuthGuardMiddleware } from "../../auth/middlewares/optional-bearer-auth.middleware";
 
 export const postsRouter = Router({});
 
@@ -56,6 +57,7 @@ postsRouter.get(
   idParamValidation("postId"),
   commentQueryValidation,
   inputValidationResultMiddleware,
+  optionalAuthGuardMiddleware,
   commentsController.getCommentsByPostIdListHandler.bind(commentsController),
 );
 
