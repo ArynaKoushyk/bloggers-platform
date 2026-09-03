@@ -10,6 +10,7 @@ import { commentQueryValidation } from "../../comments/validation/comment-query.
 import { createCommentInputValidation } from "../../comments/validation/create-comment.input.validation";
 import { commentsController, postsController } from "../../core/composition/composition-root";
 import { optionalAuthGuardMiddleware } from "../../auth/middlewares/optional-bearer-auth.middleware";
+import { updateLikeStatusInputValidation } from "../../likes/validation/update-like-status.input.validation";
 
 export const postsRouter = Router({});
 
@@ -17,6 +18,7 @@ postsRouter.get(
   "",
   postQueryValidation,
   inputValidationResultMiddleware,
+  optionalAuthGuardMiddleware,
   postsController.getPostListHandler.bind(postsController),
 );
 
@@ -24,6 +26,7 @@ postsRouter.get(
   "/:id",
   idParamValidation("id"),
   inputValidationResultMiddleware,
+  optionalAuthGuardMiddleware,
   postsController.getPostHandler.bind(postsController),
 );
 
@@ -68,4 +71,13 @@ postsRouter.post(
   createCommentInputValidation,
   inputValidationResultMiddleware,
   commentsController.createCommentByPostIdHandler.bind(commentsController),
+);
+
+postsRouter.put(
+  "/:postId/like-status",
+  bearerAuthGuardMiddleware,
+  idParamValidation("postId"),
+  updateLikeStatusInputValidation,
+  inputValidationResultMiddleware,
+  postsController.updatePostLikeStatusHandler.bind(postsController),
 );

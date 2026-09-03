@@ -6,6 +6,7 @@ import { UserModel } from "../../users/infrastructure/persistence/mongoose/user.
 import { CommentModel } from "../../comments/infrastructure/persistence/mongoose/comment.model";
 import { AuthSessionModel } from "../../auth/infrastructure/persistence/mongoose/auth-session.model";
 import { ApiRequestLogModel } from "../../request-logs/infrastructure/persistence/mongoose/api-request-log.model";
+import { LikeModel } from "../../likes/infrastructure/persistence/mongoose/like.model";
 
 export const testingRouter = Router({});
 testingRouter.delete("/all-data", async (req: Request, res: Response) => {
@@ -17,6 +18,7 @@ testingRouter.delete("/all-data", async (req: Request, res: Response) => {
     CommentModel.deleteMany({}),
     AuthSessionModel.deleteMany({}),
     ApiRequestLogModel.deleteMany({}),
+    LikeModel.deleteMany({}),
   ]);
   return res.sendStatus(HttpStatus.NoContent);
 });

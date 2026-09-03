@@ -5,5 +5,6 @@ export type CreateLikeData = {
   parentId: string;
   parentType: LikeParentType;
   authorId: string;
+  authorLogin: string;
   status: StoredLikeStatus;
 };

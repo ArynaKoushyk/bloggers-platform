@@ -19,3 +19,4 @@ export function mapToCommentViewModel(
     createdAt: comment.createdAt.toISOString(),
   };
 }
+

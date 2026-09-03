@@ -10,6 +10,7 @@ const likeSchema = new Schema<LikeDbType>(
     parentId: { type: String, required: true },
     parentType: { type: String, enum: LikeParentType, required: true },
     authorId: { type: String, required: true },
+    authorLogin: { type: String, required: true },
     status: {
       type: String,
       enum: [LikeStatus.Like, LikeStatus.Dislike],

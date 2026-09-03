@@ -130,7 +130,7 @@ export class CommentsController {
     if (!user) return res.sendStatus(HttpStatus.Unauthorized);
     const updateResult = await this.updateCommentLikeStatusUseCase.execute(
       commentId,
-      user.id,
+      user,
       updateDto,
     );
     if (updateResult.status !== ResultStatus.Success) {

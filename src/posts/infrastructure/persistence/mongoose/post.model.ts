@@ -47,6 +47,8 @@ const postSchema = new Schema<PostDbType, PostModelType, PostMethods, {}, {}, Po
     content: { type: String, required: true },
     blogId: { type: String, required: true },
     blogName: { type: String, required: true, minLength: 1, maxLength: 250 },
+    likesCount: { type: Number, default: 0 },
+    dislikesCount: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
   },
   { optimisticConcurrency: true },

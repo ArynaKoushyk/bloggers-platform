@@ -5,6 +5,7 @@ export type LikeDbType = {
   parentId: string;
   parentType: LikeParentType;
   authorId: string;
+  authorLogin: string;
   status: StoredLikeStatus;
   createdAt: Date;
   updatedAt: Date;

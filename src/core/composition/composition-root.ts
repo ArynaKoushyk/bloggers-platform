@@ -19,6 +19,7 @@ import { GetPostsByBlogIdQueryHandler } from "../../posts/queries/get-posts-by-b
 import { GetPostListQueryHandler } from "../../posts/queries/get-posts-list.query-handler";
 import { MongoPostsQueryRepository } from "../../posts/infrastructure/persistence/mongoose/mongoose-posts.query-repository";
 import { MongoPostsRepository } from "../../posts/infrastructure/persistence/mongoose/mongoose-posts.repository";
+import { UpdatePostLikeStatusUseCase } from "../../posts/use-cases/update-post-like-status.use-case";
 import { GetUserQueryHandler } from "../../users/queries/get-user.query-handler";
 import { GetUsersListQueryHandler } from "../../users/queries/get-users-list.query-handler";
 import { MongoUsersQueryRepository } from "../../users/infrastructure/persistence/mongoose/mongoose-users.query-repository";
@@ -109,6 +110,7 @@ container.bind<IPostsService>(POSTS_SERVICE).to(PostsService).inSingletonScope()
 container.bind(GetPostQueryHandler).toSelf().inSingletonScope();
 container.bind(GetPostListQueryHandler).toSelf().inSingletonScope();
 container.bind(GetPostsByBlogIdQueryHandler).toSelf().inSingletonScope();
+container.bind(UpdatePostLikeStatusUseCase).toSelf().inSingletonScope();
 container.bind(PostsController).to(PostsController).inSingletonScope();
 
 container

@@ -20,6 +20,8 @@ import { PaginatedViewModel } from "../../core/types/paginated-view.model";
 import { UpdatePostInputDto } from "../dto/update-post.input.dto";
 import { inject, injectable } from "inversify";
 import { POSTS_SERVICE } from "../../core/composition/di-tokens";
+import { UpdateLikeStatusInputDto } from "../../likes/dto/update-like-status.input.dto";
+import { UpdatePostLikeStatusUseCase } from "../use-cases/update-post-like-status.use-case";
 
 @injectable()
 export class PostsController {
@@ -29,6 +31,8 @@ export class PostsController {
     @inject(GetPostListQueryHandler) private getPostListQueryHandler: GetPostListQueryHandler,
     @inject(GetPostsByBlogIdQueryHandler)
     private getPostsByBlogIdQueryHandler: GetPostsByBlogIdQueryHandler,
+    @inject(UpdatePostLikeStatusUseCase)
+    private updatePostLikeStatusUseCase: UpdatePostLikeStatusUseCase,
   ) {}
 
   async createPostByBlogIdHandler(
@@ -83,7 +87,7 @@ export class PostsController {
 
   async getPostListHandler(req: Request, res: Response<PaginatedViewModel<PostViewModel>>) {
     const query = getPostQueryInput(req);
-    const result = await this.getPostListQueryHandler.findAllPosts(query);
+    const result = await this.getPostListQueryHandler.findAllPosts(query, req.user?.id);
     if (result.status !== ResultStatus.Success) {
       return res.sendStatus(resultCodeToHttpException(result.status));
     }
@@ -92,7 +96,7 @@ export class PostsController {
 
   async getPostHandler(req: Request<{ id: string }>, res: Response<PostViewModel>) {
     const id = req.params.id;
-    const result = await this.getPostQueryHandler.findPostById(id);
+    const result = await this.getPostQueryHandler.findPostById(id, req.user?.id);
 
     if (result.status !== ResultStatus.Success) {
       return res.sendStatus(resultCodeToHttpException(result.status));
@@ -106,7 +110,11 @@ export class PostsController {
   ) {
     const blogId = req.params.id;
     const query = getPostQueryInput(req);
-    const result = await this.getPostsByBlogIdQueryHandler.findPostsByBlogId(blogId, query);
+    const result = await this.getPostsByBlogIdQueryHandler.findPostsByBlogId(
+      blogId,
+      query,
+      req.user?.id,
+    );
     if (result.status !== ResultStatus.Success) {
       return res.sendStatus(resultCodeToHttpException(result.status));
     }
@@ -128,6 +136,21 @@ export class PostsController {
     }
     if (result.status !== ResultStatus.Success) {
       return res.sendStatus(resultCodeToHttpException(result.status));
+    }
+    return res.sendStatus(HttpStatus.NoContent);
+  }
+
+  async updatePostLikeStatusHandler(
+    req: RequestWithParamsAndBody<{ postId: string }, UpdateLikeStatusInputDto>,
+    res: Response,
+  ) {
+    const postId = req.params.postId;
+    const updateDto = req.body.likeStatus;
+    const user = req.user;
+    if (!user) return res.sendStatus(HttpStatus.Unauthorized);
+    const updateResult = await this.updatePostLikeStatusUseCase.execute(postId, user, updateDto);
+    if (updateResult.status !== ResultStatus.Success) {
+      return res.sendStatus(resultCodeToHttpException(updateResult.status));
     }
     return res.sendStatus(HttpStatus.NoContent);
   }

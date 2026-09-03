@@ -4,5 +4,7 @@ export type PostDbType = {
   content: string;
   blogId: string;
   blogName: string;
+  likesCount: number;
+  dislikesCount: number;
   createdAt: Date;
 };

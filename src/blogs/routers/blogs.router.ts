@@ -8,6 +8,7 @@ import { blogQueryValidation } from "../validation/blog-query.validation";
 import { postQueryValidation } from "../../posts/validation/post-query.validation";
 import { updateBlogInputValidation } from "../validation/update-blog.input.validation";
 import { blogsController, postsController } from "../../core/composition/composition-root";
+import { optionalAuthGuardMiddleware } from "../../auth/middlewares/optional-bearer-auth.middleware";
 export const blogsRouter = Router({});
 
 blogsRouter.get(
@@ -55,6 +56,7 @@ blogsRouter.get(
   idParamValidation("id"),
   postQueryValidation,
   inputValidationResultMiddleware,
+  optionalAuthGuardMiddleware,
   postsController.getPostsByBlogIdHandler.bind(postsController),
 );
 
